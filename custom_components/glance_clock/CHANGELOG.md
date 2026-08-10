@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2026-08-10
+### Fixed
+- Settings writes no longer discard fields this integration does not model. The
+  message was rebuilt from nine named fields, which deleted the device's nested
+  Do-Not-Disturb schedule and an undocumented field, and invented
+  `mgrUserActivityTimeout`. Writing that field as `0` stops the twelve rim points
+  staying lit. Writes now parse the device's own bytes and change only what the
+  caller asked for. Verified against hardware (model 666, firmware 1.6.7).
+- `mgrUserActivityTimeout` removed from the no-read fallback defaults rather than
+  invented for a device that may not use it.
+
+### Added
+- `glance_clock.set_dnd_schedule` and `glance_clock.read_dnd_schedule` services for
+  the recurring Do-Not-Disturb window stored on the clock.
+- **DND Start** and **DND End** number entities so the window can be adjusted from
+  the device page.
+- Tests covering settings preservation and the DND submessage.
+
 ## [1.2.0] - 2025-11-14
 ### Added
 - Support for icons in notification text using `[icon:CODE]` syntax. See `ICONS.md` for available codes.

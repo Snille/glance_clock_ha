@@ -147,6 +147,7 @@ Once configured, the integration provides:
 - **Light** - Control brightness and power state
 - **Switches** - Time Mode, Night Mode, Always Show Points
 - **Selects** - Date Format options
+- **Numbers** - DND Start and DND End, the recurring quiet window stored on the clock
 - **Sensors** - Battery level percentage
 - **Notify** - Send notifications via `notify.glance_clock`
 
@@ -215,6 +216,32 @@ data:
   weather_entity: weather.home
   max_color: "#FF0000"
   min_color: "#0000FF"
+```
+
+### Set DND Schedule
+
+Sets the recurring Do Not Disturb window the clock applies itself. This is stored on the
+device and keeps working while Home Assistant is down. It is separate from the permanent
+DND flag.
+
+```yaml
+action: glance_clock.set_dnd_schedule
+data:
+  from_hour: 21
+  till_hour: 7
+  recurring: true
+```
+
+`from_hour` and `till_hour` are hours, 0-23. The end may be earlier than the start, to
+span midnight. The same window is available as the **DND Start** and **DND End** number
+entities on the device page.
+
+### Read DND Schedule
+
+Writes the window currently stored on the clock to the Home Assistant log.
+
+```yaml
+action: glance_clock.read_dnd_schedule
 ```
 
 ### Read Current Settings
