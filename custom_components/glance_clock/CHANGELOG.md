@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.0] - 2026-08-11
+### Added
+- **The integration now listens to the clock.** Both Glance characteristics carry the
+  notify property, so the clock can speak first -- it just had nobody listening. Anything
+  it pushes is fired as a `glance_clock_notification` event carrying the characteristic
+  and the raw bytes, which makes it usable as an automation trigger in Node-RED or a
+  Home Assistant automation.
+- A **Last Notification** diagnostic sensor showing the most recent push and which
+  characteristic it came from, so this is visible without watching the event bus.
+
+  What the clock actually sends is undocumented and, as of this release, unobserved. The
+  interesting candidate is the physical button: the clock has exactly one, and if a press
+  arrives here it becomes a trigger for anything.
+
 ## [1.17.1] - 2026-08-11
 ### Added
 - `read_characteristic` accepts `list`, which enumerates every service and
