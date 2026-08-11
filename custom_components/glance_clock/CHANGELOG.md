@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2026-08-11
+### Fixed
+- Brightness is no longer treated as a plain 0-255 value. Measured against hardware,
+  only the low byte of `displayBrightness` is the manual level -- 1 is barely visible,
+  255 is full, and 0 hands control back to the ambient light sensor. A working clock
+  reported 2016768 (`0x1EC600`) in that field, so the old code both misreported the
+  state (calling automatic "brightness 2016768") and destroyed the upper bits when
+  writing, which has been observed to leave the rim points dark. The upper bits are
+  now preserved.
+
 ## [1.3.1] - 2026-08-11
 ### Fixed
 - Two settings changes in quick succession no longer undo each other. The settings
