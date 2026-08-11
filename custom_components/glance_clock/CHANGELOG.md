@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.16.1] - 2026-08-11
+### Changed
+- **Time Mode** is now **Digital Clock**. It shows and hides the digital time on the
+  matrix, which the old name -- taken from the protocol field `timeModeEnable` -- did
+  not say. The control was there all along; nobody could tell that it was.
+
 ## [1.16.0] - 2026-08-11
 ### Added
 - **The three effects are now in the Animation select**, alongside the firmware
