@@ -263,6 +263,27 @@ data:
         - { start: 6, length: 6, ring: 0, rings_tall: 4, color: red }
 ```
 
+Steps take a `type`. `fill` is the default; the others reach the rest of what a scene
+can hold:
+
+```yaml
+- type: effect          # pulse | wave | light_flash, layered onto what is already drawn
+  effect: pulse
+  rise: 20
+  fall: 80
+  segments: [{ start: 0, length: 12, rings_tall: 4, color: royal_blue }]
+  seconds: 3
+- type: weather         # snow | rain | fog -- a particle effect, not a forecast
+  condition: snow
+  position: full        # full | upper | lower
+  intensity: 8
+  seconds: 15
+- type: text            # stays on screen, unlike a notice
+  text: "Ute: -3[icon:176]C"
+- type: sound           # a cue at a point on the timeline
+  sound: bells
+```
+
 A step without `at` follows on from the previous one, so a simple sequence needs only
 durations. Two things to design around:
 

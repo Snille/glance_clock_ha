@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.0] - 2026-08-11
+### Added
+- `set_scene` steps now take a `type`, unlocking the rest of the CustomScene object:
+  - `effect` -- pulse, wave or light_flash, layered onto areas already drawn in the
+    same scene rather than drawing anything itself. Pulse takes rise and fall times,
+    wave and light_flash take a speed, and light_flash its own colour.
+  - `weather` -- snow, rain or fog as a particle effect over the whole face or half of
+    it, with an intensity. It is not a forecast readout. Verified on hardware: snow
+    drifts across the face with the digital time still readable underneath.
+  - `text` -- text that stays on screen, unlike a notice, with the same `[icon:CODE]`
+    markers.
+  - `sound` -- a sound cue placed at a frame on the timeline.
+
+### Changed
+- `text_with_icons_to_bytes` was defined twice as a nested function; it is now one
+  module-level helper shared by notices, timers and scenes.
+
 ## [1.9.0] - 2026-08-11
 ### Added
 - `glance_clock.set_scene`: a timed sequence of fills that the clock plays itself at
