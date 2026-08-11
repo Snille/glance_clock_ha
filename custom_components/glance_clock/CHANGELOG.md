@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.0] - 2026-08-11
+### Fixed
+- **An unknown colour name failed as silence.** The services caught the error, logged
+  it, and returned, so the call looked like it had succeeded and the clock simply never
+  heard from it. They now raise, so the mistake appears where it was made. The message
+  lists the palette, which is all it ever took to fix.
+- The palette is the firmware's own and has no plain `green`, `purple`, `orange` or
+  `cyan` -- the first names anyone reaches for. Those, plus `cyan`, `magenta`, `violet`,
+  `gold`, `spring_green` and `off`, now resolve to their nearest real entry.
+
+### Verified on hardware
+- `wave` runs across the rings from the inside out, not around them, and leaves the
+  rings at different intensities when it stops.
+- An effect must be chained after the fill that drew its area, never overlapped with it.
+
+### Correction to 1.14.0
+- The claim that the clock ignores scenes sent to a busy slot was **wrong**. Every test
+  that appeared to show it used the colour name `green`, which does not exist, so those
+  scenes were never sent at all. The slot is still cleared before a write, which is
+  harmless and may still be worth doing, but it is unverified and fixed nothing.
+
 ## [1.14.1] - 2026-08-11
 ### Changed
 - **Confirm Hand Position** is now **Confirm Hand Positions at 12**. The button names
@@ -10,7 +31,8 @@ All notable changes to this project will be documented in this file.
 
 ## [1.14.0] - 2026-08-11
 ### Fixed
-- **Scenes sent to a busy slot were silently dropped.** The clock ignores a scene
+- **[Later shown to be wrong -- see 1.15.0.]** Scenes sent to a busy slot were
+  believed to be silently dropped: the clock was thought to ignore a scene
   written to a slot that is still playing: it acknowledges the write, draws nothing,
   and logs nothing. Every scene service now clears the slot before writing it, so a
   send does what it says. This was behind a long run of tests that looked like broken
