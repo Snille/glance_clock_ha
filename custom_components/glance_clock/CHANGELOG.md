@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.16.0] - 2026-08-11
+### Added
+- **The three effects are now in the Animation select**, alongside the firmware
+  animations: `pulse`, `wave` and `light_flash`. They use the same colour and speed
+  controls and the same Animation Run and Animation Stop buttons, so nothing about them
+  needs YAML. An effect needs an area lit before it can modulate one, and the button
+  fills the whole ring first and chains the effect after it.
+
+### Changed
+- A bad speed or colour on Animation Run now surfaces in the interface instead of only
+  in the log, the same way the LED services do since 1.15.0.
+
 ## [1.15.1] - 2026-08-11
 ### Verified on hardware
 - All three effects now confirmed working. `pulse` breathes in place. `wave` runs across
