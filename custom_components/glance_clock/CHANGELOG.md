@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-08-11
+### Added
+- **Calibrate Hands** and **Confirm Hand Position** buttons on the device page, so the
+  whole hand calibration can be done from Home Assistant the way the original app
+  allowed. Previously this was only reachable through the options flow.
+
 ## [1.4.0] - 2026-08-11
 ### Fixed
 - Brightness is no longer treated as a plain 0-255 value. Measured against hardware,
