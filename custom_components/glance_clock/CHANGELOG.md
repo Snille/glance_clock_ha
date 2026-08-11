@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.0] - 2026-08-11
+### Added
+- `glance_clock.set_scene`: a timed sequence of fills that the clock plays itself at
+  50 frames per second. One call uploads the whole timeline, which is the only way to
+  animate -- sending fills one at a time cannot, because a scene change only takes
+  effect on the clock's roughly 15 second scene cycle.
+
+Verified on hardware with an eight step chase around the rings. Two things worth
+knowing: anything drawn stays on screen after its step ends, so a step that should
+erase has to paint black over it; and the clock restarts the scene on its own cycle,
+so a timeline shorter than about 750 frames pauses visibly before repeating.
+
 ## [1.8.0] - 2026-08-11
 ### Added
 - Animation controls on the device page: an **Animation** select, an **Animation

@@ -245,6 +245,32 @@ digital time, `exclusive` hides the digital clockface, and `ring_and_text` alter
 between the two. Colours are names from the clock's fixed palette -- there is no
 arbitrary RGB.
 
+### Set Scene
+
+Uploads a timed sequence of fills that the clock plays itself at 50 frames per second.
+This is how to build your own animations: one call carries the whole timeline.
+
+```yaml
+action: glance_clock.set_scene
+data:
+  steps:
+    - seconds: 0.5
+      segments:
+        - { start: 0, length: 6, ring: 0, rings_tall: 4, color: red }
+    - seconds: 0.5
+      segments:
+        - { start: 0, length: 6, ring: 0, rings_tall: 4, color: black }
+        - { start: 6, length: 6, ring: 0, rings_tall: 4, color: red }
+```
+
+A step without `at` follows on from the previous one, so a simple sequence needs only
+durations. Two things to design around:
+
+- **Fills persist.** Anything drawn stays after its step ends, so paint black over what
+  should disappear -- that is what makes a block move instead of a ring fill up.
+- **The clock restarts the scene on its own ~15 second cycle.** A timeline shorter than
+  roughly 750 frames will run, finish, and visibly wait before repeating.
+
 ### Set Animation
 
 Runs one of the animations built into the clock's firmware.
