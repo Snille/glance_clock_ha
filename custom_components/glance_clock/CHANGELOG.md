@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.0] - 2026-08-11
+### Added
+- Animation controls on the device page: an **Animation** select, an **Animation
+  Colour** select, an **Animation Speed** slider and **Run Animation** / **Stop
+  Animation** buttons. The whole thing can now be driven from the UI without writing
+  a service call.
+
+The selects and the slider are local choices rather than device state -- the clock
+stores no pending animation -- so they restore across restarts. Black is left out of
+the colour list: it is a valid colour that renders nothing, which is indistinguishable
+from a broken integration. Run Animation always uses the same scene slot, so running
+one replaces the last instead of filling the clock's slots and making it cycle.
+
 ## [1.7.0] - 2026-08-11
 ### Added
 - `glance_clock.set_animation`, exposing the animations built into the firmware:

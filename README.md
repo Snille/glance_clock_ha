@@ -148,7 +148,8 @@ Once configured, the integration provides:
 - **Switches** - Time Mode, Night Mode, Always Show Points
 - **Selects** - Date Format options
 - **Numbers** - DND Start and DND End, the recurring quiet window stored on the clock
-- **Buttons** - Calibrate Hands and Confirm Hand Position
+- **Buttons** - Calibrate Hands, Confirm Hand Position, Run Animation, Stop Animation
+- **Animation controls** - Animation, Animation Colour and Animation Speed, driving the Run Animation button
 - **Sensors** - Battery level percentage
 - **Notify** - Send notifications via `notify.glance_clock`
 
