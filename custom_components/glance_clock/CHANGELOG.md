@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.18.1] - 2026-08-11
+### Fixed
+- Last Notification now carries `count` and `received_at`. The clock repeats itself, and
+  a sensor that only records changes hid every repeat -- five button presses pushing the
+  same byte looked like one. Counting them is the difference between an instrument and a
+  decoration.
+
 ## [1.18.0] - 2026-08-11
 ### Added
 - **The integration now listens to the clock.** Both Glance characteristics carry the
