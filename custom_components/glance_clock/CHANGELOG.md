@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-08-11
+### Added
+- `glance_clock.set_animation`, exposing the animations built into the firmware:
+  fire, wheel, flower, flower2, fan, sun, thunderstorm and cloud, plus a `sweep`
+  that fills the ring from a start pixel and repeats.
+
+They are single-colour patterns tinted by the colour you pick, so a colour must be
+given -- black renders nothing at all. Only `sweep` has a direction: its speed sign
+reverses it. The firmware animations render lengths in multiples of 8 and round
+anything else down, which the service now warns about instead of leaving it looking
+like a bug.
+
 ## [1.6.0] - 2026-08-11
 ### Added
 - `glance_clock.set_leds` and `glance_clock.clear_leds`, giving direct control of the

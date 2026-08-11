@@ -244,6 +244,26 @@ digital time, `exclusive` hides the digital clockface, and `ring_and_text` alter
 between the two. Colours are names from the clock's fixed palette -- there is no
 arbitrary RGB.
 
+### Set Animation
+
+Runs one of the animations built into the clock's firmware.
+
+```yaml
+action: glance_clock.set_animation
+data:
+  animation: fire
+  color: red
+  speed: 3
+```
+
+Available: `fire`, `wheel`, `flower`, `flower2`, `fan`, `sun`, `thunderstorm`, `cloud`,
+and `sweep`. They are single-colour patterns tinted by `color` -- picking black renders
+nothing. Only `sweep` has a direction; a negative `speed` runs it anticlockwise.
+
+Note that the clock's scene engine updates on a roughly 15 second cycle, so a scene or
+animation takes up to that long to appear. Notifications are immediate -- use
+`send_notice` when something *happens*, and scenes for showing *state*.
+
 ### Clear LEDs
 
 ```yaml
