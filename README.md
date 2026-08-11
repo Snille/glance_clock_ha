@@ -219,6 +219,39 @@ data:
   min_color: "#0000FF"
 ```
 
+### Set LEDs
+
+Lights areas of the four LED rings. Each ring has 48 pixels, pixel 0 is at twelve
+o'clock and numbering runs clockwise. Ring 0 is the outermost.
+
+```yaml
+action: glance_clock.set_leds
+data:
+  mode: watchface
+  segments:
+    - start: 0
+      length: 12
+      ring: 0
+      color: red
+    - start: 24
+      length: 6
+      ring: 1
+      color: sky_blue
+```
+
+`mode` decides how the scene shares the display: `watchface` draws it alongside the
+digital time, `exclusive` hides the digital clockface, and `ring_and_text` alternates
+between the two. Colours are names from the clock's fixed palette -- there is no
+arbitrary RGB.
+
+### Clear LEDs
+
+```yaml
+action: glance_clock.clear_leds
+data:
+  slot: 0
+```
+
 ### Set DND Schedule
 
 Sets the recurring Do Not Disturb window the clock applies itself. This is stored on the

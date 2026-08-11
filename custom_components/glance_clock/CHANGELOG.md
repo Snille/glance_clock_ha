@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-08-11
+### Added
+- `glance_clock.set_leds` and `glance_clock.clear_leds`, giving direct control of the
+  four 48-pixel LED rings through CustomScene fills. Areas are described by start
+  pixel, length, ring and colour; several can be lit in one call.
+- Display mode is selectable: `watchface` shows the scene together with the digital
+  time, `exclusive` hides the digital clockface, `ring_and_text` alternates with it.
+
+The segment layout was mapped against hardware: pixel 0 sits at twelve o'clock and
+numbering runs clockwise, ring 0 is the outermost, and length and height are stored
+one less than their real values.
+
 ## [1.5.0] - 2026-08-11
 ### Added
 - **Calibrate Hands** and **Confirm Hand Position** buttons on the device page, so the
