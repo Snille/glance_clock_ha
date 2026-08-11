@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2026-08-11
+### Fixed
+- Two settings changes in quick succession no longer undo each other. The settings
+  cache was filled on read, lived for 60 seconds and was never invalidated after a
+  write, so a second change started from pre-first-change bytes and silently reverted
+  it. This is why switches in Home Assistant could disagree with the device. Writes
+  now update the cache with what was actually sent.
+
 ## [1.3.0] - 2026-08-10
 ### Fixed
 - Settings writes no longer discard fields this integration does not model. The
