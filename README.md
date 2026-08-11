@@ -166,6 +166,8 @@ Once configured, the integration provides:
   `pulse`, `wave` and `light_flash` need no YAML either
 - **Sound controls** - a Sound select and a Sound Play button for auditioning the eighteen sounds
 - **Sensors** - Battery level, and Last Notification showing anything the clock pushes on its own
+- **Binary sensor** - Busy, true while a notice or scene is playing. The clock reports this
+  itself, so it is something to wait on rather than guess at
 - **Notify** - Send notifications via `notify.glance_clock`
 
 

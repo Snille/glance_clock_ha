@@ -7,6 +7,23 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.20.0] - 2026-08-11
+### Added
+- A **Busy** binary sensor, true while a notice or scene is playing. The clock reports
+  its own display state on the `scene_data` characteristic and pushes it on every change;
+  this makes it usable. Decoded and verified on hardware:
+
+  | byte | meaning |
+  |---|---|
+  | `0x81` | idle, digital time shown |
+  | `0x80` | idle, digital time hidden |
+  | `0x00` | busy |
+
+  Bit 7 is idle, bit 0 is the digital time. The attributes carry both.
+
+  This is worth more than it looks: a notice sent while another plays is not queued, and
+  the scene cycle is otherwise invisible from outside. Now it can be waited on.
+
 ## [1.19.0] - 2026-08-11
 ### Added
 - Two worked Node-RED flows in `examples/node-red/`: weather drawn on the rings, and an

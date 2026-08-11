@@ -91,6 +91,18 @@ The second half of the flow sends a notice when the machine drops back below
 temperature. Leave it out if you find it chatty — it is there to show that a
 notice is cheap and that the clock is fine being talked to often.
 
+## Waiting for the clock to be free
+
+`binary_sensor.<name>_busy` is true while a notice or scene is playing. The
+clock reports this itself and pushes every change, so it is something to wait
+on rather than guess at -- a notice sent while another one plays is not queued,
+it is simply lost.
+
+The usual shape is a **current state** node checking the sensor is `off`
+before the call service node, with a short delay and a retry when it is not.
+Its attributes carry `digital_clock` and the raw byte, if you want to know
+whether the digital time is on screen.
+
 ## Sound
 
 Sound only plays if the clock is not muted. There is a **Mute** switch on the
