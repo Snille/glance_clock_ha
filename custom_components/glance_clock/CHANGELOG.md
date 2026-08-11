@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.12.0] - 2026-08-11
+### Added
+- A **Sound** select and a **Sound Play** button. The clock has eighteen sounds whose
+  names say little about how they sound, so they can now be auditioned from the device
+  page. The sound's name is shown on the clock while it plays, so stepping through the
+  list tells you which is which.
+
+### Changed
+- The animation controls are named **Animation Run** and **Animation Stop** rather than
+  "Run Animation" and "Stop Animation", so every animation control sorts together in
+  the UI. Entity ids are unchanged, so existing automations keep working.
+
 ## [1.11.0] - 2026-08-11
 ### Added
 - A **Mute** switch. The clock's permanent mute flag was neither visible nor settable,
