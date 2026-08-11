@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.17.1] - 2026-08-11
+### Added
+- `read_characteristic` accepts `list`, which enumerates every service and
+  characteristic with the properties each supports. Whether the clock can push anything
+  at all -- a button press, a timer expiring -- comes down to whether some
+  characteristic carries notify, and nothing available documents that.
+
+### Notes
+- The ambient light reading is **not** exposed over GATT reads. Fifteen samples across
+  two minutes with a lamp on the sensor, with `brightnessSceneStart` (61) active and the
+  clock in automatic mode, left all three characteristics byte-identical. Command 61 does
+  work -- the clock displays "Auto" -- it just publishes nothing. Notifications remain
+  untested, and are the only path left.
+
 ## [1.17.0] - 2026-08-11
 ### Added
 - A **Read characteristic** service. The clock exposes characteristics this integration
