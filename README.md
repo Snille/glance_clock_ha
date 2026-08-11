@@ -1,22 +1,34 @@
 # Glance Clock Integration for Home Assistant
 
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://github.com/hacs/integration)
-[![GitHub Release](https://img.shields.io/github/release/PorlyBe/glance_clock_ha.svg)](https://github.com/PorlyBe/glance_clock_ha/releases)
-[![License](https://img.shields.io/github/license/PorlyBe/glance_clock_ha.svg)](LICENSE)
+[![GitHub Release](https://img.shields.io/github/release/Snille/glance_clock_ha.svg)](https://github.com/Snille/glance_clock_ha/releases)
+[![License](https://img.shields.io/github/license/Snille/glance_clock_ha.svg)](LICENSE)
 
 Home Assistant custom integration for Glance Clock devices via Bluetooth.
+
+> **This is a fork of [PorlyBe/glance_clock_ha](https://github.com/PorlyBe/glance_clock_ha)**
+> with a good deal added and several things fixed, all tested against a real
+> clock. See [HISTORY.md](./HISTORY.md) for what changed and why.
+>
+> Glance Clock's manufacturer is gone and the servers with it, so a clock on the
+> wall has nothing left to talk to. This integration is how it gets used again.
 
 <!-- [IMAGE: Banner image showing the Glance Clock device] -->
 
 ## Features
 
-- 🔔 **Send Notifications** - Display custom messages with animations and sounds
-- 💡 **Light Control** - Adjust brightness and power state
-- 🔄 **Switch Controls** - Toggle various clock features (time mode, night mode, points display)
-- 🎛️ **Select Options** - Choose different display modes and date formats
-- 📊 **Sensor Data** - Monitor battery level and device information
-- 🌤️ **Weather Forecast** - Send 24-hour weather data with color gradients
-- 🔗 **Bluetooth Native** - Leverages Home Assistant's built-in Bluetooth integration
+- 🔔 **Notifications** - Custom messages with animations and sounds
+- 💍 **The LED rings** - Four rings of 48 addressable pixels, drivable directly
+- 🎬 **Scenes** - Upload a timeline the clock plays itself at 50 frames per second
+- ✨ **Effects** - Pulse, wave and light flash, all confirmed on hardware
+- 🔥 **Firmware animations** - Fire, wheel, flower, fan, sun, thunderstorm, cloud, sweep
+- 🌨️ **Weather particles** - Snow, rain and fog drawn on the rings
+- 🕐 **Hand calibration** - From the device page, no app required
+- 🔊 **Sound** - All eighteen, auditionable from the interface
+- 💡 **Brightness** - Automatic or manual, without destroying the clock's own state
+- 🌙 **Do not disturb** - The recurring quiet window, readable and settable
+- 🛠️ **Raw access** - Send any command frame, read any characteristic
+- 🔗 **Bluetooth Native** - Uses Home Assistant's built-in Bluetooth integration
 
 <!-- [IMAGE: Screenshot of the integration in Home Assistant UI] -->
 
@@ -145,13 +157,15 @@ If the device doesn't appear automatically, you can manually add it:
 Once configured, the integration provides:
 
 - **Light** - Control brightness and power state
-- **Switches** - Time Mode, Night Mode, Always Show Points, Mute
+- **Switches** - Digital Clock, Night Mode, Always Show Points, Mute
 - **Selects** - Date Format options
 - **Numbers** - DND Start and DND End, the recurring quiet window stored on the clock
-- **Buttons** - Calibrate Hands, Confirm Hand Position, Run Animation, Stop Animation
-- **Animation controls** - Animation, Animation Colour and Animation Speed, driving Animation Run
-- **Sound controls** - a Sound select and a Sound Play button for auditioning the clock's eighteen sounds
-- **Sensors** - Battery level percentage
+- **Buttons** - Calibrate Hands, Confirm Hand Positions at 12, Animation Run, Animation Stop
+- **Animation controls** - Animation, Animation Colour and Animation Speed, driving Animation Run.
+  The Animation select carries the firmware animations *and* the three effects, so
+  `pulse`, `wave` and `light_flash` need no YAML either
+- **Sound controls** - a Sound select and a Sound Play button for auditioning the eighteen sounds
+- **Sensors** - Battery level, and Last Notification showing anything the clock pushes on its own
 - **Notify** - Send notifications via `notify.glance_clock`
 
 
@@ -321,6 +335,38 @@ data:
   slot: 0
 ```
 
+### Send Command
+
+Sends a raw command frame. The firmware understands more than this integration models,
+and this is how to reach the rest of it -- useful commands include 30 and 31 (stop and
+start scene playback), 35 (update and refresh) and 61 and 60 (start and stop the
+brightness scene, which puts "Auto" on the display).
+
+Commands 42 and 50 are refused. They unpair the clock, which has no pairing button to
+recover with, and wipe user data the manufacturer's servers can no longer restore.
+
+```yaml
+action: glance_clock.send_command
+data:
+  command: 31
+  modifiers: [0, 0, 0]   # optional, padded with zeroes
+  payload: "20 01"       # optional, hex or a list of bytes
+```
+
+### Read Characteristic
+
+Reads one of the clock's GATT characteristics and returns the bytes as a service
+response, rather than logging them where they may not be retrievable.
+
+Pass `list` instead of a name to enumerate every service and characteristic with the
+properties each supports.
+
+```yaml
+action: glance_clock.read_characteristic
+data:
+  characteristic: scene_state    # settings, scene_data, scene_state, list, or a UUID
+```
+
 ### Set DND Schedule
 
 Sets the recurring Do Not Disturb window the clock applies itself. This is stored on the
@@ -428,13 +474,48 @@ The clock will now automatically display a 24-hour temperature forecast with col
 - Some Glance Clock models may not support battery reporting via Bluetooth
 - Battery data updates periodically, not in real-time
 
+## Driving it from Node-RED
+
+Everything is a Home Assistant service call, so Node-RED needs no special node.
+There are two worked examples in [`examples/node-red/`](./examples/node-red/) --
+weather on the rings, and an espresso machine announcing itself when it comes up
+to temperature -- along with the handful of things worth knowing before you
+start.
+
+Three of those are worth repeating here, because each one looks like a bug the
+first time:
+
+**A scene stays in its slot.** It does not disappear when its lifetime ends; it
+stays and replays until the slot is cleared with `clear_leds`.
+
+**Notices are immediate, scenes are not.** A scene joins the display on the
+clock's own cycle, up to about fifteen seconds later. Anything you are standing
+there waiting for should be a notice.
+
+**Sound needs the clock unmuted.** A muted clock plays nothing and reports no
+error, which looks exactly like a bad sound name. There is a Mute switch on the
+device page.
+
+## What the clock will not do
+
+Recorded so it does not get investigated twice:
+
+- **The ambient light sensor is not readable.** The clock measures light and sets
+  its own brightness from it, but no characteristic exposes the value. Fifteen
+  samples over two minutes with a lamp on the sensor, with `brightnessSceneStart`
+  active and the clock in automatic mode, were byte-identical.
+- **The button is not a trigger.** A short press shows a status message on the
+  clock and pushes nothing over Bluetooth. The clock does notify on connect and
+  on power state, which is what the Last Notification sensor shows.
+
 ## Credits
 
 This integration uses protocol and implementation insights from [Hypfer's Glance Clock project](https://github.com/Hypfer/glance-clock). Special thanks to the original developers for documenting the Glance Clock protocol and providing a foundation for Bluetooth communication.
 
 ## Support
 
-- [Report Issues](https://github.com/PorlyBe/glance_clock_ha/issues)
+- [Report Issues](https://github.com/Snille/glance_clock_ha/issues)
+- [Upstream project](https://github.com/PorlyBe/glance_clock_ha) this is forked from
 
 ## License
 

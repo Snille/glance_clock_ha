@@ -1,6 +1,24 @@
-# Changelog
+# History
 
-All notable changes to this project will be documented in this file.
+Every release, newest first, and why each change was made. Entries from 1.3.0
+onwards were written while working against a real clock, so where something is
+recorded as verified it means somebody watched the hardware do it -- and where
+a conclusion was later found to be wrong, the correction is left in place
+rather than the claim quietly removed.
+
+
+## [1.19.0] - 2026-08-11
+### Added
+- Two worked Node-RED flows in `examples/node-red/`: weather drawn on the rings, and an
+  espresso machine announcing itself when it comes up to temperature. The accompanying
+  notes cover the three things that each look like a bug the first time -- scenes staying
+  in their slot, scenes waiting for the clock's cycle while notices do not, and sound
+  being silently swallowed by the Mute switch.
+
+### Changed
+- The changelog moved to `HISTORY.md` in the repository root and the README was rewritten
+  around what the integration can now do. Added a section for what the clock *cannot* do,
+  so the ambient light sensor and the button do not get investigated a second time.
 
 ## [1.18.1] - 2026-08-11
 ### Fixed
