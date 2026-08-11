@@ -55,7 +55,34 @@ async def async_setup_entry(
     )
 
 
-class GlanceClockCommandButton(GlanceClockEntity, ButtonEntity):
+class GlanceClockButtonBase(GlanceClockEntity, ButtonEntity):
+    """Base for the clock's buttons, keeping availability honest.
+
+    Buttons do not poll, so `available` is only re-evaluated when the entity
+    writes its state. Without this, a button set up while the clock was still
+    connecting stays greyed out until something unrelated happens to wake it --
+    the button works, it just looks broken. Writing state when the connection
+    comes up is all it takes.
+    """
+
+    async def async_added_to_hass(self) -> None:
+        await super().async_added_to_hass()
+        if self._connection_manager:
+            self._connection_manager.add_connection_callback(
+                self._on_connection_established)
+
+    async def async_will_remove_from_hass(self) -> None:
+        if self._connection_manager:
+            self._connection_manager.remove_connection_callback(
+                self._on_connection_established)
+        await super().async_will_remove_from_hass()
+
+    async def _on_connection_established(self) -> None:
+        """Re-evaluate availability now that the clock is reachable."""
+        self.async_write_ha_state()
+
+
+class GlanceClockCommandButton(GlanceClockButtonBase):
     """A button that sends one payload-less command to the clock."""
 
     _command: int
@@ -123,7 +150,7 @@ ANIMATION_SLOT = 0
 ANIMATION_MODE = 8
 
 
-class GlanceClockRunAnimationButton(GlanceClockEntity, ButtonEntity):
+class GlanceClockRunAnimationButton(GlanceClockButtonBase):
     """Send the animation chosen by the animation selects and speed slider.
 
     Named "Animation Run" rather than "Run Animation" so all the animation
@@ -181,7 +208,7 @@ class GlanceClockRunAnimationButton(GlanceClockEntity, ButtonEntity):
         )
 
 
-class GlanceClockStopAnimationButton(GlanceClockEntity, ButtonEntity):
+class GlanceClockStopAnimationButton(GlanceClockButtonBase):
     """Clear whatever the Run Animation button last sent."""
 
     def __init__(self, config_entry, mac_address, device_name, connection_manager):
@@ -211,7 +238,7 @@ class GlanceClockStopAnimationButton(GlanceClockEntity, ButtonEntity):
         await notify_service.async_delete_scene(ANIMATION_SLOT)
 
 
-class GlanceClockPlaySoundButton(GlanceClockEntity, ButtonEntity):
+class GlanceClockPlaySoundButton(GlanceClockButtonBase):
     """Play the sound chosen by the Sound select.
 
     Sent as a notice rather than a scene: notices are immediate, while a scene

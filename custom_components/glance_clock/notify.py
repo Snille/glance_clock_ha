@@ -357,6 +357,16 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.debug(f"Could not read settings from device: {e}")
             return None
 
+    async def _free_scene_slot(self, slot: int) -> None:
+        """Delete whatever occupies a slot before writing a new scene into it.
+
+        The clock silently ignores a scene sent to a slot that is still playing.
+        It acknowledges the write, nothing appears, and nothing is logged --
+        which reads as a broken integration rather than a busy slot. Clearing
+        first costs one command and makes a send mean what it says.
+        """
+        await self.async_delete_scene(slot)
+
     async def async_send_custom_scene(
         self,
         segments: list[int],
@@ -380,6 +390,8 @@ class GlanceClockNotificationService(BaseNotificationService):
         try:
             from .glance_pb2 import CustomScene  # type: ignore
             from .utils.led_utils import METHOD_FILL
+
+            await self._free_scene_slot(slot)
 
             scene = CustomScene()
             obj = scene.object.add()
@@ -434,6 +446,8 @@ class GlanceClockNotificationService(BaseNotificationService):
                 METHOD_TEXT,
                 METHOD_WEATHER,
             )
+
+            await self._free_scene_slot(slot)
 
             scene = CustomScene()
             for step in steps:
@@ -529,6 +543,8 @@ class GlanceClockNotificationService(BaseNotificationService):
                 METHOD_GIF,
                 METHOD_MOVING_BAR,
             )
+
+            await self._free_scene_slot(slot)
 
             scene = CustomScene()
             obj = scene.object.add()

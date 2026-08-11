@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.0] - 2026-08-11
+### Fixed
+- **Scenes sent to a busy slot were silently dropped.** The clock ignores a scene
+  written to a slot that is still playing: it acknowledges the write, draws nothing,
+  and logs nothing. Every scene service now clears the slot before writing it, so a
+  send does what it says. This was behind a long run of tests that looked like broken
+  effects, a broken slot, and then broken firmware -- it was none of those.
+- Buttons no longer stay greyed out after the clock reconnects. They do not poll, so
+  availability was only re-evaluated when something else happened to write their state;
+  a button set up while the clock was still connecting looked dead but worked.
+
 ## [1.13.0] - 2026-08-11
 ### Added
 - A **Send command** service for raw command frames. The firmware understands more than
