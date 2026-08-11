@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.17.0] - 2026-08-11
+### Added
+- A **Read characteristic** service. The clock exposes characteristics this integration
+  never reads, and what is in them is undocumented. It returns a service response rather
+  than logging: this deployment writes no log file to disk, and a message nobody can
+  retrieve is the same as no message -- which is exactly how a whole day was lost.
+
 ## [1.16.1] - 2026-08-11
 ### Changed
 - **Time Mode** is now **Digital Clock**. It shows and hides the digital time on the
