@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.14.1] - 2026-08-11
+### Changed
+- **Confirm Hand Position** is now **Confirm Hand Positions at 12**. The button names
+  its precondition rather than its action: pressing it while the hands are anywhere but
+  straight up teaches the clock a wrong reference, and the old name did not say so.
+
 ## [1.14.0] - 2026-08-11
 ### Fixed
 - **Scenes sent to a busy slot were silently dropped.** The clock ignores a scene
