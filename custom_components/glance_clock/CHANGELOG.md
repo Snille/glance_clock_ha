@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.11.0] - 2026-08-11
+### Added
+- A **Mute** switch. The clock's permanent mute flag was neither visible nor settable,
+  so a muted clock looked like broken sound support rather than a setting.
+
+### Fixed
+- Non-ASCII characters are transliterated instead of masked to 7 bits. Masking turned
+  them into different letters -- "Hej då" arrived as "Hej de" -- which is worse than
+  either translating or dropping them. Anything still unmappable now becomes the font's
+  own missing-character glyph, so a lost letter is visible. Applies to notices, timers
+  and scene text alike.
+- `set_scene` warns when a text step is combined with `watchface` mode. The digital
+  clockface owns the matrix there, so the text never appears; silence looked like a
+  broken service.
+
 ## [1.10.0] - 2026-08-11
 ### Added
 - `set_scene` steps now take a `type`, unlocking the rest of the CustomScene object:

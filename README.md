@@ -145,7 +145,7 @@ If the device doesn't appear automatically, you can manually add it:
 Once configured, the integration provides:
 
 - **Light** - Control brightness and power state
-- **Switches** - Time Mode, Night Mode, Always Show Points
+- **Switches** - Time Mode, Night Mode, Always Show Points, Mute
 - **Selects** - Date Format options
 - **Numbers** - DND Start and DND End, the recurring quiet window stored on the clock
 - **Buttons** - Calibrate Hands, Confirm Hand Position, Run Animation, Stop Animation
