@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.13.0] - 2026-08-11
+### Added
+- A **Send command** service for raw command frames. The firmware understands more than
+  this integration models, and some of it only matters in situations that are awkward to
+  reach -- scene playback being left stopped after a power cycle, for one. It also gives
+  Node-RED a way to drive the clock without waiting for a named service to exist.
+
+  Commands 42 and 50 are refused. They unpair the clock, which has no pairing button to
+  recover with, and wipe user data that the manufacturer's servers can no longer restore.
+
+### Notes
+- `pulse` is confirmed working on hardware. An effect must **not** overlap the fill that
+  drew its area: the fill holds the area at a constant colour for its whole lifetime and
+  overwrites the effect's modulation. Chaining the steps, which is what happens when a
+  step omits `at`, is the correct shape. `wave` and `light_flash` remain unverified.
+
 ## [1.12.0] - 2026-08-11
 ### Added
 - A **Sound** select and a **Sound Play** button. The clock has eighteen sounds whose
