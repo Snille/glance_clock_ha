@@ -337,6 +337,25 @@ data:
   slot: 0
 ```
 
+### Removing the forecast again
+
+`send_forecast` writes to **scene slot 1**, and a scene stays in its slot and replays
+until something clears it. So the forecast comes off the clock with:
+
+```yaml
+action: glance_clock.clear_leds
+data:
+  slot: 1
+```
+
+Worth keeping the slots straight: slot 0 is what the animation buttons on the device page
+use, and slot 1 belongs to the forecast. Two things sharing a slot means whichever
+arrives second wins.
+
+The degree symbol follows Home Assistant's own units. The forecast values are already
+converted by the time they reach the integration, so only the letter changes -- °C or °F,
+taken from the weather entity, falling back to the system setting.
+
 ### Send Command
 
 Sends a raw command frame. The firmware understands more than this integration models,

@@ -7,6 +7,21 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.21.0] - 2026-08-11
+### Added
+- The forecast now labels its temperatures **°F** when that is what Home Assistant is
+  using, instead of always writing °C (upstream issue #1). The values themselves needed
+  no work: Home Assistant converts a weather entity to the user's own unit before the
+  integration sees it, so converting again would double-convert. The unit comes from the
+  weather entity, falling back to the system setting.
+
+### Documentation
+- `send_forecast` writes to **scene slot 1**, and a scene stays in its slot and replays
+  until cleared -- so `clear_leds` with slot 1 removes the forecast (upstream issue #1,
+  "add option to delete weather scene"). This already worked; nothing said so.
+- The Node-RED weather example moved off slot 1, which it had picked while explaining
+  that it was avoiding a collision.
+
 ## [1.20.0] - 2026-08-11
 ### Added
 - A **Busy** binary sensor, true while a notice or scene is playing. The clock reports
