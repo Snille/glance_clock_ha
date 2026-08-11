@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.15.1] - 2026-08-11
+### Verified on hardware
+- All three effects now confirmed working. `pulse` breathes in place. `wave` runs across
+  the rings from the inside out, not around them. `light_flash` flashes at uneven
+  intervals and **replaces** the area's colour rather than layering over it, so the fill
+  colour is gone for its duration -- pick the flash colour as the one you want to see.
+
 ## [1.15.0] - 2026-08-11
 ### Fixed
 - **An unknown colour name failed as silence.** The services caught the error, logged
