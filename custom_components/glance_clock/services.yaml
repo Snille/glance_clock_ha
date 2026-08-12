@@ -684,3 +684,28 @@ read_characteristic:
       example: scene_state
       selector:
         text:
+
+stop_timer:
+  name: Stop timer
+  description: >-
+    Cancel a timer the clock is currently running. Send Timer starts one and the
+    clock counts it down by itself, so without this there was no way to call it
+    off short of clearing the display.
+
+stop_alarm:
+  name: Stop alarm
+  description: Silence an alarm the clock is sounding.
+
+stop_scenes:
+  name: Stop scene playback
+  description: >-
+    Stop the scene engine. Scenes stay in their slots but nothing is drawn from
+    them until playback is started again. Useful mainly for getting out of a
+    state where the clock was left stopped -- for instance after a power cycle.
+
+start_scenes:
+  name: Start scene playback
+  description: >-
+    Start the scene engine, and redraw at once. This is what every scene write
+    already sends for you, which is why a scene appears the moment it is sent.
+    Sending it by hand is for recovering a clock that was left stopped.

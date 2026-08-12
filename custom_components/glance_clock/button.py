@@ -11,6 +11,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from .animation_state import get_animation_state
 from .const import DOMAIN
 from .entity import GlanceClockEntity
+from .services.commands import NAMED_COMMANDS
 from .utils.led_utils import (
     EFFECTS,
     PIXELS_PER_RING,
@@ -60,6 +61,13 @@ async def async_setup_entry(
                 config_entry, mac_address, name, connection_manager),
             GlanceClockClearAllScenesButton(
                 config_entry, mac_address, name, connection_manager),
+            *(
+                GlanceClockNamedCommandButton(
+                    config_entry, mac_address, name, connection_manager,
+                    command_name, label, icon,
+                )
+                for command_name, label, icon in COMMAND_BUTTONS
+            ),
         ]
     )
 
@@ -150,6 +158,43 @@ class GlanceClockConfirmHandsButton(GlanceClockCommandButton):
         self._attr_name = f"{device_name} Confirm Hand Positions at 12"
         self._attr_unique_id = f"{mac_address}_confirm_hand_position"
         self._attr_icon = "mdi:check-decagram-outline"
+
+
+class GlanceClockNamedCommandButton(GlanceClockCommandButton):
+    """One button per named command, so the useful frames need no number.
+
+    Not a config control: stopping a running timer is an action the household
+    takes, not a setting, so these sit with the other buttons rather than being
+    filed away under configuration.
+    """
+
+    _attr_entity_category = None
+
+    def __init__(
+        self,
+        config_entry,
+        mac_address,
+        device_name,
+        connection_manager,
+        command_name,
+        label,
+        icon,
+    ):
+        """Initialize a button for one entry in NAMED_COMMANDS."""
+        super().__init__(config_entry, mac_address, device_name, connection_manager)
+        self._command = NAMED_COMMANDS[command_name]
+        self._attr_name = f"{device_name} {label}"
+        self._attr_unique_id = f"{mac_address}_{command_name}"
+        self._attr_icon = icon
+
+
+#: The named commands worth a button, and how they should read on the page.
+COMMAND_BUTTONS = (
+    ("stop_timer", "Stop Timer", "mdi:timer-off-outline"),
+    ("stop_alarm", "Stop Alarm", "mdi:alarm-off"),
+    ("stop_scenes", "Scene Playback Stop", "mdi:pause-box-outline"),
+    ("start_scenes", "Scene Playback Start", "mdi:play-box-outline"),
+)
 
 
 #: Where the animation buttons write when nothing else is chosen. The Animation
