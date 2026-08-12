@@ -7,6 +7,39 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.22.0] - 2026-08-12
+### Fixed
+- **`notify.glance_clock` could not have worked with named values.** The platform passed
+  `animation: "pulse"` and `sound: "bells"` -- its own documented arguments -- straight
+  into protobuf integer fields, which raised inside a broad `except` and left the
+  notification unsent while logging something unrelated. Names are resolved there now,
+  the same way `send_notice` does it. Raw indices still pass through, so anything already
+  working keeps working.
+
+- **`send_timer` refused the simple timer its own description invited.** `intervals` was
+  marked required in the schema while the description said to leave it empty, and
+  `countdown` reached `int()` as `None` when omitted and raised. Both are optional now,
+  and a timer with neither is a valid message that simply has nothing to count.
+
+### Changed
+- **A notice with a value the firmware does not have now says so.** Colour, animation,
+  sound, priority and text effect were each looked up with a default, so a typo arrived
+  as white, a pulse, or silence -- indistinguishable from the clock ignoring the command,
+  and the reason a colour that "did nothing" used to cost an evening. They raise now and
+  the message lists what would have worked, which is what the LED services already did.
+
+  The colour aliases come along: `green`, `purple`, `orange` and `cyan` resolve in a
+  notice exactly as they do in `set_leds`. Having them work in one place and not the
+  other was a difference with no reason behind it.
+
+- **The notice dropdowns now offer everything the firmware has.** They listed 9 of 23
+  animations, 6 of 18 sounds, 7 of 25 colours and 4 of 5 priorities, so `fan`, `flower2`,
+  the twelve `weather_*` icons and two thirds of the palette were reachable from YAML but
+  invisible to anyone clicking. The lists are generated from the tables in `const.py`, and
+  a test walks every entry to keep the two from drifting apart.
+
+  Validated with hassfest, which is the only thing that checks these selectors properly.
+
 ## [1.21.1] - 2026-08-12
 ### Documentation
 - **SCENES.md** writes down what was previously only discoverable by reading `const.py`

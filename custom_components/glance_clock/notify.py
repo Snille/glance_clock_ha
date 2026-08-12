@@ -61,15 +61,9 @@ def text_with_icons_to_bytes(text: str) -> bytes:
 def _resolve_sound(value) -> int:
     """Accept a sound name from SOUNDS or a raw index."""
     from .const import SOUNDS
+    from .utils.enums import lookup_enum
 
-    if isinstance(value, str):
-        key = value.strip().lower()
-        if key not in SOUNDS:
-            raise ValueError(
-                f"unknown sound '{value}'; expected one of {', '.join(sorted(SOUNDS))}"
-            )
-        return SOUNDS[key]
-    return int(value)
+    return lookup_enum(SOUNDS, value, "sound")
 
 
 
@@ -182,27 +176,26 @@ class GlanceClockNotificationService(BaseNotificationService):
         # Extract notification parameters from kwargs
         title = kwargs.get("title", "")
         data = kwargs.get("data", {})
-        
-        # Default notification settings
-        animation = data.get("animation", 1)  # Default: Pulse
-        sound = data.get("sound", 0)  # Default: None
-        color = data.get("color", 12)  # Default: White
-        priority = data.get("priority", 16)  # Default: Medium
-        text_modifier = data.get("text_modifier", 0)  # Default: None
-        
+
+        # The documented way to call this platform is with names -- animation:
+        # "pulse", sound: "bells". Those went straight through to protobuf
+        # integer fields, which raised and left the notification unsent, so the
+        # example in the README could not have worked. Resolve them here, the
+        # same way send_notice does; raw indices still pass through.
+        from .services.notice import resolve_notice
+
+        try:
+            notice = resolve_notice(data)
+        except (ValueError, TypeError) as err:
+            _LOGGER.error("Cannot send notification: %s", err)
+            return
+
         # Combine title and message
         full_text = f"{title}: {message}" if title else message
-        
+
         try:
-            success = await self.async_send_notice(
-                text=full_text,
-                animation=animation,
-                sound=sound,
-                color=color,
-                priority=priority,
-                text_modifier=text_modifier
-            )
-            
+            success = await self.async_send_notice(text=full_text, **notice)
+
             if success:
                 _LOGGER.info(f"Notification sent successfully: {full_text}")
             else:

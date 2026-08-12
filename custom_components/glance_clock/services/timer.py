@@ -18,8 +18,13 @@ async def handle_send_timer(hass: HomeAssistant, entry: ConfigEntry, call: Servi
         if connection_manager and not hasattr(notify_service, '_connection_manager'):
             notify_service._connection_manager = connection_manager
 
-        countdown = call.data.get("countdown")
-        intervals = call.data.get("intervals", [])
+        # Both of these are optional, and both used to break when left out.
+        # `countdown` reached int() as None and raised; `intervals` was marked
+        # required in the schema, so the UI refused the plain countdown the
+        # description invited. A timer with neither is still a valid message --
+        # it just has nothing to count.
+        countdown = call.data.get("countdown") or 0
+        intervals = call.data.get("intervals") or []
         final_text = call.data.get("final_text", "")
 
         success = await notify_service.async_send_timer(

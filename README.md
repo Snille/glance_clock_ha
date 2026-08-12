@@ -206,11 +206,15 @@ data:
 
 - `message` (required): Notification text
 - `title`: Notification title
-- `animation`: Animation effect (none, pulse, wave, fire, wheel, flower, sun, thunderstorm, cloud)
-- `sound`: Sound effect (none, waves, rise, bells, radar, hello, complete)
-- `color`: Display color (white, red, blue, lime, dark_orange, blue_violet, lawn_green)
-- `priority`: Priority level (low, medium, high, critical)
+- `animation`: One of 23 — `none`, `pulse`, `wave`, `fire`, `wheel`, `flower`, `flower2`,
+  `fan`, `sun`, `thunderstorm`, `cloud`, and twelve `weather_*` icons
+- `sound`: One of 18 — see the Sound select on the device page to audition them
+- `color`: Any of the 25 palette colours, listed in [SCENES.md](./SCENES.md#the-colour-palette)
+- `priority`: `low`, `medium`, `high`, `highest`, `critical`
 - `text_modifier`: Text effect (none, repeat, rapid, delay)
+
+A name outside those lists raises and says what would have worked, rather than
+quietly sending white, silence or a pulse. Raw indices are still accepted.
 
 ### Update Display Settings
 
