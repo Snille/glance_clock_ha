@@ -17,18 +17,20 @@ as it ran. So it answers "is something on the display", not "is the clock
 willing to take a notice". Anyone keeping a permanent scene on the rings will
 find it permanently busy, and waiting for it to clear will simply time out.
 
-It reports whether it may disturb you on scene_state, two bytes, pushed the
-moment the answer changes. Decoded on hardware 2026-08-12 by moving the DND
-window across the current time and toggling mute:
+It reports whether it may disturb you on scene_state, pushed the moment the
+answer changes. Decoded on hardware 2026-08-12 by moving the DND window across
+the current time and toggling mute:
 
     0x04 0x22   nothing suppressed
     0x14 0x22   the quiet window is in force
     0x0c 0x22   muted
 
-So bit 4 is DND and bit 3 is mute, both in the first byte, and bit 2 is set in
-every sample seen. Night mode and brightness changes push nothing at all, which
-fits: this characteristic is about whether the clock may speak, not how it
-looks. The second byte has never been anything but 0x22.
+Those two bytes are one little-endian word, and every bit of it means something
+-- see state.py. Bit 4 is Do Not Disturb and bit 3 is mute, as found here; the
+0x22 that looked like a constant is `cable_connected | no_data`, constant only
+because this clock lives on a cable. Night mode and brightness changes push
+nothing at all, which fits: this characteristic is about whether the clock may
+speak, not how it looks.
 
 That matters because the quiet window was write-only until now. The schedule
 could be set and the permanent flag toggled, but nothing said whether the clock
@@ -52,6 +54,7 @@ from .const import (
     SCENE_DATA_CHARACTERISTIC_UUID,
     SCENE_STATE_DATA_CHARACTERISTIC_UUID,
 )
+from .state import ClockState
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,12 +63,6 @@ IDLE_BIT = 0x80
 
 #: Bit 0: the digital time is on screen.
 DIGITAL_CLOCK_BIT = 0x01
-
-#: scene_state, first byte. Bit 4: the quiet window is in force.
-DND_BIT = 0x10
-
-#: scene_state, first byte. Bit 3: the clock is muted.
-MUTE_BIT = 0x08
 
 
 async def async_setup_entry(
@@ -211,22 +208,20 @@ class GlanceClockQuietBinarySensor(BinarySensorEntity):
         """True while the quiet window is in force."""
         if self._raw is None:
             return None
-        return bool(self._raw & DND_BIT)
+        return self._raw.flag("do_not_disturb")
 
     @property
     def extra_state_attributes(self) -> dict:
-        """Carry the mute flag from the same byte, and the byte itself.
+        """Carry everything else the same push already contained.
 
-        Mute rides along because it arrives in the same push and answers the
-        neighbouring question -- a notice reaching a muted clock is silent, and
-        that is otherwise indistinguishable from a bad sound name.
+        Mute is the one that answers the neighbouring question -- a notice
+        reaching a muted clock is silent, and that is otherwise
+        indistinguishable from a bad sound name. The rest arrives free: whether
+        the clock is charging, on a cable, or has failed to home its hands.
         """
         if self._raw is None:
             return {}
-        return {
-            "muted": bool(self._raw & MUTE_BIT),
-            "raw": f"{self._raw:02x}",
-        }
+        return self._raw.as_attributes()
 
     async def async_added_to_hass(self) -> None:
         """Read the current state, then follow the clock's own updates."""
@@ -241,7 +236,7 @@ class GlanceClockQuietBinarySensor(BinarySensorEntity):
             payload = event.data.get("bytes") or []
             if not payload:
                 return
-            self._raw = payload[0]
+            self._raw = ClockState.from_bytes(bytes(payload))
             self.async_write_ha_state()
 
         self.async_on_remove(
@@ -264,5 +259,5 @@ class GlanceClockQuietBinarySensor(BinarySensorEntity):
             _LOGGER.debug("Could not read quiet-hours state: %s", err)
             return
         if data:
-            self._raw = bytes(data)[0]
+            self._raw = ClockState.from_bytes(bytes(data))
             self.async_write_ha_state()
