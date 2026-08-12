@@ -41,6 +41,14 @@ glance_say:
       selector:
         text:
   sequence:
+    # Busy means the display is not idle, and a scene standing in a slot
+    # counts -- verified on hardware 2026-08-12, where a running animation held
+    # it on. So if you keep a progress ring or a forecast on the rings, this
+    # wait never clears and every message costs twenty seconds before going out
+    # anyway. Drop these three lines in that case: a notice interrupts whatever
+    # is on the rings regardless, and the wait only helps against another
+    # notice.
+    #
     # continue_on_timeout: after twenty seconds, sending and possibly losing
     # the message beats silently doing nothing.
     - wait_template: "{{ is_state('binary_sensor.glance_clock_busy', 'off') }}"

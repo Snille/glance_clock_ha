@@ -56,7 +56,9 @@ and `electricity-price.yaml` show how far they get.
 Two things catch everyone once:
 
 **A notice sent while another one is playing is lost** — not queued. Wait on
-`binary_sensor.<name>_busy`, which the clock reports itself. Both
+`binary_sensor.<name>_busy`, which the clock reports itself -- but note that a
+scene standing in a slot holds it on, so the wait never clears if you keep the
+rings occupied. Both
 `yaml/scripts/glance-say.yaml` and `node-red/notice-queue.json` are that wait,
 packaged.
 

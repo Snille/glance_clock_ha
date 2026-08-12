@@ -3,6 +3,11 @@
 # A notice sent while another one is playing is not queued -- it is lost. This
 # waits for the busy sensor before sending.
 #
+# Busy covers scenes too: a scene standing in a slot holds it on, verified on
+# hardware. If you keep something permanent on the rings this wait never
+# clears, so drop it -- a notice interrupts the rings regardless, and the wait
+# only buys you anything against another notice.
+#
 # continue_on_timeout: true is deliberate: after twenty seconds, sending and
 # possibly losing the message beats silently doing nothing.
 

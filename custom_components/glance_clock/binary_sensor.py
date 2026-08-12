@@ -9,8 +9,13 @@ one byte, pushed whenever it changes. Decoded on hardware:
 
 So bit 7 means idle and bit 0 means the digital time is on screen. That makes
 "is the clock busy" something to wait on rather than guess at: a notice sent
-while another is playing is not queued, and the fifteen second scene cycle is
-otherwise invisible from the outside.
+while another is playing is not queued.
+
+Busy means the display is not idle, and that includes a scene standing in a
+slot -- confirmed 2026-08-12, where a running animation held it on for as long
+as it ran. So it answers "is something on the display", not "is the clock
+willing to take a notice". Anyone keeping a permanent scene on the rings will
+find it permanently busy, and waiting for it to clear will simply time out.
 
 It reports whether it may disturb you on scene_state, two bytes, pushed the
 moment the answer changes. Decoded on hardware 2026-08-12 by moving the DND
