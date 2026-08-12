@@ -494,6 +494,26 @@ that silently becomes white; everywhere else it raises with the full list.
 **The block smeared instead of moving.** Fills persist — paint black over the
 previous position.
 
+**A notice wiped my scene.** Expected, and not recoverable. A notice empties the
+slot rather than borrowing the display: after it finishes, the scene is gone and
+no playback command brings it back -- 31, 35 and 30+31 were all tried on
+hardware 2026-08-12, with and without sound, and none of them restored anything.
+
+The integration deliberately does not cache scenes to re-send them. It would
+mean a background task per notice, bookkeeping against `clear_leds`, and a
+lifetime across restarts, all for a case that comes up rarely: wanting an
+animation to keep running *underneath* a passing message.
+
+If that is what you want, do not send a notice at all -- **put the text in the
+scene**, as a `text` step. It lives in the slot with everything else and nothing
+interrupts anything. See
+[`text-with-sound.yaml`](./examples/yaml/scenes/text-with-sound.yaml).
+
+The limit worth knowing: a scene cannot carry the firmware animations. `fire`,
+`wheel` and the rest are a different object, reachable only through
+`set_animation`, so text over *fire* is not possible today. Text over `pulse`,
+`wave` or your own fills is.
+
 **Something stayed lit after the animation ended.** The same rule, at the end
 rather than the middle: the last thing drawn has nobody to paint over it. Add a
 closing step of black.

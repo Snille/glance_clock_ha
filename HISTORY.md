@@ -7,6 +7,28 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.24.1] - 2026-08-12
+### Documentation
+- **A notice empties the scene slot.** It does not borrow the display and hand it back:
+  after a notice the scene is gone, and no playback command brings it back. Command 31,
+  35 and 30 followed by 31 were each tried on hardware, with sound and without, and none
+  restored anything.
+
+  Recorded rather than fixed. Caching the scenes to re-send them would mean a background
+  task per notice, bookkeeping against `clear_leds`, and a lifetime across restarts -- a
+  lot of moving parts for the rare case of wanting an animation to keep running
+  underneath a passing message. The answer when you do want that is not a notice at all
+  but a `text` step inside the scene, which lives in the slot with everything else.
+
+  With the limit named: a scene cannot carry the firmware animations, so text over `fire`
+  is not possible today, while text over `pulse`, `wave` or your own fills is.
+
+- **A standing scene counts as busy.** The busy sensor answers "is something on the
+  display", not "is the clock willing to take a notice" -- caught when a test recorded it
+  as `on` ten seconds into a fire animation, before any notice was sent. The wait-for-idle
+  pattern appears in four examples and never clears for anyone keeping a progress ring or
+  a forecast on the rings; they now say so, and say to drop the wait in that case.
+
 ## [1.24.0] - 2026-08-12
 ### Changed
 - **Scenes appear immediately.** Every scene, animation and slot clear now asks the clock

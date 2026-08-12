@@ -533,6 +533,11 @@ first time:
 **A scene stays in its slot.** It does not disappear when its lifetime ends; it
 stays and replays until the slot is cleared with `clear_leds`.
 
+**A notice empties the slot.** It does not borrow the display and give it back --
+after a notice the scene is gone, and no playback command restores it. To show
+text without losing what is on the rings, put a `text` step in the scene instead
+of sending a notice.
+
 **A notice interrupts, a scene joins.** Both arrive at once. The difference is
 what happens next: a notice takes the display and gives it back, a scene sits
 alongside the time until something clears it.
