@@ -15,9 +15,13 @@
 #
 # Filmed on hardware 2026-08-12: the head advances four pixels every 0.2 s,
 # clockwise, exactly as written. The scene appears as soon as it is sent, but
-# 2.4 seconds of motion leaves it standing still for about twelve seconds until
-# the engine's next pass. Pad the timeline out towards 15 seconds if you want
-# continuous motion.
+# one lap is 2.4 seconds and the closing step blacks the ring out, so the slot
+# then sits EMPTY until the engine's next pass -- nine seconds of nothing, which
+# reads as a broken clock rather than a finished animation.
+#
+# Repeat the twelve steps until the timeline is roughly 15 seconds if you want
+# it to look continuous. examples/yaml/scripts/demo-and-self-test.yaml does that
+# with five laps.
 
 action: glance_clock.set_scene
 data:

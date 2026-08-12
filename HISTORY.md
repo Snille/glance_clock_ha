@@ -7,6 +7,25 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.28.0] - 2026-08-12
+### Added
+- **A demo-and-self-test script**, in `examples/yaml/scripts/`. Three minutes that exercise
+  the palette, replacing a scene in place, a firmware animation, a hand-written scene, an
+  effect, weather particles, the slot selector, the notify entity and a timer -- then
+  deliberately asks for a colour that does not exist, and finishes with a green ring, a
+  sound and "ALLT KLART" before clearing everything, so a recording knows when to stop.
+
+  Written to be filmed. Every entity id is collected at the top, and every segment and
+  timeline in it was validated against the integration's own packer before it ran.
+
+### Documentation
+- **A short self-clearing scene leaves a dark gap**, which is the other half of the
+  persistence rule and the opposite failure to the smear fixed in 1.23.0. A 2.4 second
+  comet inside a 15 second cycle is nine seconds of nothing -- filmed, and it reads as a
+  broken clock rather than a finished animation. Erasing yourself is right; being short is
+  what makes it look wrong. The comet example and SCENES.md now say to repeat the loop
+  until the timeline fills the window.
+
 ## [1.27.1] - 2026-08-12
 ### Fixed
 - **A timer with no intervals now says so instead of displaying nothing.** `countdown` is

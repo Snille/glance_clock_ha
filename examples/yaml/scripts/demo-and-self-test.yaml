@@ -1,0 +1,384 @@
+alias: Glance Clock - full demo and self test
+description: >-
+  Walks everything the integration can do, in an order that reads as a demo.
+  About three minutes. Ends with a clear finale so a recording knows when to
+  stop. Change the entity ids at the top to your own clock.
+mode: single
+icon: mdi:play-box-outline
+
+variables:
+  # Yours will differ. Settings -> Devices -> your clock lists them all.
+  # Note run_animation and stop_animation: those entity ids were frozen before
+  # the buttons were renamed to "Animation Run" and "Animation Stop", and a
+  # rename does not move them.
+  busy: binary_sensor.storstugan_office_glanceclock_busy
+  dnd: binary_sensor.storstugan_office_glanceclock_do_not_disturb
+  slot_number: number.storstugan_office_glanceclock_animation_slot
+  anim_select: select.storstugan_office_glanceclock_animation
+  colour_select: select.storstugan_office_glanceclock_animation_colour
+  run: button.storstugan_office_glanceclock_run_animation
+  stop: button.storstugan_office_glanceclock_stop_animation
+  clear_all: button.storstugan_office_glanceclock_clear_all_scenes
+  clock: notify.storstugan_office_glanceclock
+
+sequence:
+  - action: button.press
+    target: { entity_id: "{{ clear_all }}" }
+  - delay: { seconds: 4 }
+
+  # ============ 1. The palette and the geometry ==========================
+  # Four quarters, one per hour hand position. 48 pixels over 12 hours means
+  # one hour is exactly 4 pixels, so these land on 12, 3, 6 and 9.
+  - variables:
+      t1: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_leds
+    data:
+      slot: 2
+      segments:
+        - { start: 0, length: 12, ring: 0, rings_tall: 4, color: red }
+        - { start: 12, length: 12, ring: 0, rings_tall: 4, color: dark_orange }
+        - { start: 24, length: 12, ring: 0, rings_tall: 4, color: lime }
+        - { start: 36, length: 12, ring: 0, rings_tall: 4, color: royal_blue }
+  - delay: { seconds: 8 }
+
+  # ============ 2. Replacing a scene in place ============================
+  # Same slot, no clearing in between. Since 1.25.0 the new scene simply
+  # replaces the old one and shows at once.
+  - variables:
+      t2: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_leds
+    data:
+      slot: 2
+      segments:
+        - { start: 0, length: 48, ring: 0, rings_tall: 1, color: dark_green }
+        - { start: 0, length: 32, ring: 0, rings_tall: 1, color: lime }
+        - { start: 0, length: 48, ring: 2, rings_tall: 2, color: indigo }
+  - delay: { seconds: 8 }
+
+  # ============ 3. A firmware animation ==================================
+  - variables:
+      t3: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_animation
+    data: { animation: fire, color: orange_red, slot: 2, speed: 4 }
+  - delay: { seconds: 10 }
+
+  # ============ 4. A scene you wrote yourself ============================
+  # A comet: each step paints the head, dims the last position, and blacks out
+  # the one before. Persistence is what makes it move rather than accumulate.
+  #
+  # Five laps rather than one, and that is the interesting part. A single lap
+  # is 2.45 seconds, and because the timeline ends by painting itself black the
+  # slot then sits empty until the engine's next pass -- filmed as nine seconds
+  # of nothing. Erasing yourself is right; being short is what makes it look
+  # broken. Fill the window instead.
+  - variables:
+      t4: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_scene
+    data:
+      slot: 2
+      mode: watchface
+      steps:
+        - seconds: 0.35
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.35
+          segments:
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
+        # Sweep up after yourself, or the head and tail stay lit between runs.
+        - seconds: 0.35
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+  - delay: { seconds: 12 }
+
+  # ============ 5. An effect, which needs a fill under it ================
+  - variables:
+      t5: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_scene
+    data:
+      slot: 2
+      mode: watchface
+      steps:
+        - seconds: 0.2
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
+        - type: effect
+          effect: pulse
+          rise: 20
+          fall: 80
+          seconds: 12
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
+  - delay: { seconds: 14 }
+
+  # ============ 6. Weather particles, drawn by the clock =================
+  - variables:
+      t6: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_scene
+    data:
+      slot: 2
+      mode: watchface
+      steps:
+        - type: weather
+          condition: snow
+          position: full
+          intensity: 8
+          seconds: 14
+  - delay: { seconds: 14 }
+  - action: button.press
+    target: { entity_id: "{{ clear_all }}" }
+  - delay: { seconds: 4 }
+
+  # ============ 7. The slot selector =====================================
+  - variables:
+      t7: "{{ now().strftime('%H:%M:%S') }}"
+  - action: select.select_option
+    target: { entity_id: "{{ colour_select }}" }
+    data: { option: orange_red }
+  - action: number.set_value
+    target: { entity_id: "{{ slot_number }}" }
+    data: { value: 2 }
+  - action: select.select_option
+    target: { entity_id: "{{ anim_select }}" }
+    data: { option: fire }
+  - action: button.press
+    target: { entity_id: "{{ run }}" }
+  - delay: { seconds: 10 }
+
+  - action: select.select_option
+    target: { entity_id: "{{ colour_select }}" }
+    data: { option: sky_blue }
+  - action: number.set_value
+    target: { entity_id: "{{ slot_number }}" }
+    data: { value: 3 }
+  - action: select.select_option
+    target: { entity_id: "{{ anim_select }}" }
+    data: { option: wheel }
+  - action: button.press
+    target: { entity_id: "{{ run }}" }
+  - delay: { seconds: 18 }
+
+  # Stop while pointed at 3. The fire in slot 2 must survive.
+  - action: button.press
+    target: { entity_id: "{{ stop }}" }
+  - delay: { seconds: 14 }
+  - action: button.press
+    target: { entity_id: "{{ clear_all }}" }
+  - delay: { seconds: 5 }
+
+  # ============ 8. The notify entity =====================================
+  - variables:
+      t8: "{{ now().strftime('%H:%M:%S') }}"
+  - action: notify.send_message
+    target: { entity_id: "{{ clock }}" }
+    data:
+      title: "Posten"
+      message: "PAKET HAR KOMMIT [sound:bells] [anim:pulse] [color:dark_orange]"
+  - delay: { seconds: 16 }
+
+  # ============ 9. A timer the clock runs itself =========================
+  # intervals is what makes it a timer; countdown is only a lead-in delay.
+  - variables:
+      t9: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.send_timer
+    data:
+      final_text: "KLAR [icon:130]"
+      intervals:
+        - text: "TE"
+          duration: 12
+  - delay: { seconds: 22 }
+
+  # ============ 10. Something that cannot work, refused ==================
+  # Should go red in the trace and list the whole palette. continue_on_error
+  # so the finale still runs.
+  - variables:
+      t10: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.send_notice
+    continue_on_error: true
+    data:
+      text: "SKA MISSLYCKAS"
+      color: chartreuse
+  - delay: { seconds: 4 }
+
+  # ============ 11. Finale: stop recording when the clock goes plain =====
+  - variables:
+      t11: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_scene
+    data:
+      slot: 2
+      mode: exclusive
+      steps:
+        - at: 0
+          seconds: 10
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 4, color: lime_green }
+        - at: 0
+          type: sound
+          sound: complete
+        - at: 0
+          type: text
+          text: "ALLT KLART [icon:134]"
+          scroll: repeat
+          seconds: 10
+  - delay: { seconds: 12 }
+
+  # Everything off. The clock returning to a plain face is the cue to stop.
+  - action: button.press
+    target: { entity_id: "{{ clear_all }}" }
+  - delay: { seconds: 6 }
+
+  - action: persistent_notification.create
+    data:
+      title: Glance Clock demo
+      message: >-
+        1 palette {{ t1 }} · 2 replace in place {{ t2 }} · 3 firmware animation
+        {{ t3 }} · 4 comet {{ t4 }} · 5 pulse {{ t5 }} · 6 snow {{ t6 }} ·
+        7 slot selector {{ t7 }} · 8 notify entity {{ t8 }} · 9 timer {{ t9 }} ·
+        10 refused {{ t10 }} · 11 finale {{ t11 }}.
+
+        Sensors: busy={{ states(busy) }}, dnd={{ states(dnd) }},
+        muted={{ state_attr(dnd, 'muted') }}, slot={{ states(slot_number) }}.

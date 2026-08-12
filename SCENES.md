@@ -514,6 +514,13 @@ The limit worth knowing: a scene cannot carry the firmware animations. `fire`,
 `set_animation`, so text over *fire* is not possible today. Text over `pulse`,
 `wave` or your own fills is.
 
+**The animation flashed past and then nothing.** The other half of the rule
+above: a timeline that ends by painting itself black leaves the slot empty until
+the engine's next pass. A 2.4 second comet inside a 15 second cycle is nine
+seconds of darkness, filmed and confirmed. Erasing yourself is right; being
+short is what makes it look broken, so repeat the loop until the timeline fills
+the window.
+
 **Something stayed lit after the animation ended.** The same rule, at the end
 rather than the middle: the last thing drawn has nobody to paint over it. Add a
 closing step of black.
