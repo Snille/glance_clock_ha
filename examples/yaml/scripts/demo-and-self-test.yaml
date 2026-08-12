@@ -1,3 +1,9 @@
+# Demo script version 2.
+#
+# The version lives in `demo_version` below and is printed in the notification
+# the run leaves behind, so a film can be matched to the script that produced
+# it. Bump it whenever this file changes. Version 1 is the 2026-08-12 film.
+#
 # Unlike its neighbours in this directory, this file is in the form the UI
 # script editor wants -- it starts at `alias:` with no key above it. Paste the
 # whole thing into Settings -> Automations & Scenes -> Scripts -> Add script ->
@@ -7,15 +13,17 @@
 alias: Glance Clock - full demo and self test
 description: >-
   Walks everything the integration can do, in an order that reads as a demo.
-  Under two minutes. Every wait is sized for the eye rather than for the scene
-  engine, which since 1.24.0 no longer needs waiting for, and each one was then
-  measured against a film of an actual run on 2026-08-12 and cut back to what
-  the dial was still showing. Ends with a clear finale so a recording knows when
-  to stop. Change the entity ids at the top to your own clock.
+  About a minute and a half. Every wait is sized for the eye rather than for the
+  scene engine, which since 1.24.0 no longer needs waiting for, and each one was
+  then measured against a film of an actual run and cut back to what the dial
+  was still showing. Each section has its own colour, so a still frame says
+  which one it came from. Ends with a clear finale so a recording knows when to
+  stop. Change the entity ids at the top to your own clock.
 mode: single
 icon: mdi:play-box-outline
 
 variables:
+  demo_version: "2"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -33,7 +41,7 @@ variables:
 sequence:
   - action: button.press
     target: { entity_id: "{{ clear_all }}" }
-  - delay: { seconds: 3 }
+  - delay: { seconds: 2 }
 
   # ============ 1. The palette and the geometry ==========================
   # Four quarters, one per hour hand position. 48 pixels over 12 hours means
@@ -46,9 +54,9 @@ sequence:
       segments:
         - { start: 0, length: 12, ring: 0, rings_tall: 4, color: red }
         - { start: 12, length: 12, ring: 0, rings_tall: 4, color: dark_orange }
-        - { start: 24, length: 12, ring: 0, rings_tall: 4, color: lime }
-        - { start: 36, length: 12, ring: 0, rings_tall: 4, color: royal_blue }
-  - delay: { seconds: 5 }
+        - { start: 24, length: 12, ring: 0, rings_tall: 4, color: lawn_green }
+        - { start: 36, length: 12, ring: 0, rings_tall: 4, color: blue_violet }
+  - delay: { seconds: 4 }
 
   # ============ 2. Replacing a scene in place ============================
   # Same slot, no clearing in between. Since 1.25.0 the new scene simply
@@ -60,16 +68,16 @@ sequence:
       slot: 2
       segments:
         - { start: 0, length: 48, ring: 0, rings_tall: 1, color: dark_green }
-        - { start: 0, length: 32, ring: 0, rings_tall: 1, color: lime }
+        - { start: 0, length: 32, ring: 0, rings_tall: 1, color: aqua }
         - { start: 0, length: 48, ring: 2, rings_tall: 2, color: indigo }
-  - delay: { seconds: 5 }
+  - delay: { seconds: 4 }
 
   # ============ 3. A firmware animation ==================================
   - variables:
       t3: "{{ now().strftime('%H:%M:%S') }}"
   - action: glance_clock.set_animation
     data: { animation: fire, color: orange_red, slot: 2, speed: 4 }
-  - delay: { seconds: 6 }
+  - delay: { seconds: 5 }
 
   # ============ 4. A scene you wrote yourself ============================
   # A comet: each step paints the head, dims the last position, and blacks out
@@ -204,7 +212,7 @@ sequence:
           seconds: 12
           segments:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
-  - delay: { seconds: 8 }
+  - delay: { seconds: 6 }
 
   # ============ 6. Weather particles, drawn by the clock =================
   - variables:
@@ -219,28 +227,32 @@ sequence:
           position: full
           intensity: 8
           seconds: 14
-  - delay: { seconds: 8 }
+  - delay: { seconds: 6 }
 
   # ============ 7. The slot selector =====================================
-  # No clearing between 6 and 7. The fire below goes into slot 2, which is where
+  # No clearing between 6 and 7. The sun below goes into slot 2, which is where
   # the snow already is, so it simply replaces it -- and that replacement is
   # worth seeing. Pressing Clear All Scenes here instead cost six seconds of
   # blank dial on the 2026-08-12 film: it writes eight deletes in a row over BLE
   # and takes about five seconds to finish.
+  #
+  # A different animation and colour from section 3 on purpose. Two runs of the
+  # same fire proved nothing about slots -- you could not tell which one you
+  # were looking at.
   - variables:
       t7: "{{ now().strftime('%H:%M:%S') }}"
   - action: select.select_option
     target: { entity_id: "{{ colour_select }}" }
-    data: { option: orange_red }
+    data: { option: dark_golden_rod }
   - action: number.set_value
     target: { entity_id: "{{ slot_number }}" }
     data: { value: 2 }
   - action: select.select_option
     target: { entity_id: "{{ anim_select }}" }
-    data: { option: fire }
+    data: { option: sun }
   - action: button.press
     target: { entity_id: "{{ run }}" }
-  - delay: { seconds: 8 }
+  - delay: { seconds: 6 }
 
   - action: select.select_option
     target: { entity_id: "{{ colour_select }}" }
@@ -253,12 +265,14 @@ sequence:
     data: { option: wheel }
   - action: button.press
     target: { entity_id: "{{ run }}" }
-  - delay: { seconds: 12 }
+  - delay: { seconds: 9 }
 
-  # Stop while pointed at 3. The fire in slot 2 must survive.
+  # Stop while the slider still points at 3. The gold sun in slot 2 must come
+  # back, and being a different animation in a different colour is what makes
+  # that readable on film.
   - action: button.press
     target: { entity_id: "{{ stop }}" }
-  - delay: { seconds: 8 }
+  - delay: { seconds: 6 }
   # Two slots were used, so clear those two rather than all eight. Same result
   # here, five seconds faster.
   - action: glance_clock.clear_leds
@@ -274,7 +288,7 @@ sequence:
     target: { entity_id: "{{ clock }}" }
     data:
       title: "Delivery"
-      message: "PARCEL HAS ARRIVED [sound:bells] [anim:pulse] [color:dark_orange]"
+      message: "PARCEL HAS ARRIVED [sound:bells] [anim:pulse] [color:dark_magenta]"
   # Timed off the film: this notice is on the dial for about seven seconds.
   - delay: { seconds: 8 }
 
@@ -288,7 +302,7 @@ sequence:
       intervals:
         - text: "TEA"
           duration: 8
-  - delay: { seconds: 12 }
+  - delay: { seconds: 11 }
 
   # ============ 10. Something that cannot work, refused ==================
   # Should go red in the trace and list the whole palette. continue_on_error
@@ -329,11 +343,11 @@ sequence:
   # Everything off. The clock returning to a plain face is the cue to stop.
   - action: button.press
     target: { entity_id: "{{ clear_all }}" }
-  - delay: { seconds: 4 }
+  - delay: { seconds: 3 }
 
   - action: persistent_notification.create
     data:
-      title: Glance Clock demo
+      title: "Glance Clock demo (script v{{ demo_version }})"
       message: >-
         1 palette {{ t1 }} · 2 replace in place {{ t2 }} · 3 firmware animation
         {{ t3 }} · 4 comet {{ t4 }} · 5 pulse {{ t5 }} · 6 snow {{ t6 }} ·
