@@ -7,6 +7,25 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.29.1] - 2026-08-12
+### Fixed
+- **The Factory Scene select announced faces nobody had selected.** It read the `scene_data`
+  characteristic back to find out which face was showing. What the clock pushes on that
+  characteristic is its display status, not the face number you wrote -- and `0x81`, an idle
+  clock with its digits on, decodes as face 1, the calendar. Since the clock pushes a status
+  byte after any setting is touched, toggling anything at all -- date format, night mode,
+  brightness, the DND hours -- flipped this control to "calendar". Nothing had been written
+  to the clock; the control invented it, and then looked like it was doing something.
+
+  It is one-way now: the number goes out, nothing is read back, and the selection is
+  remembered across restarts the way the animation choices are.
+
+### Settled
+- **`scene_data` means different things in each direction.** 1.29.0 listed this as open.
+  Written, the low bits select one of the clock's own faces. Pushed, they are display
+  status -- bit 0 is the digital time, bit 7 is idle. The bug above is the evidence: a face
+  number would not change when you alter the date format.
+
 ## [1.29.0] - 2026-08-12
 ### Added
 - **The clock's state word is decoded in full.** The two bytes it pushes on `scene_state`

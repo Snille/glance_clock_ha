@@ -4,7 +4,7 @@ import asyncio
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -18,7 +18,6 @@ from .const import (
     FACTORY_SCENES,
     SCENE_DATA_CHARACTERISTIC_UUID,
     SOUNDS,
-    decode_factory_scene,
 )
 from .entity import GlanceClockEntity
 from .utils.led_utils import RUNNABLE
@@ -254,17 +253,25 @@ class GlanceClockSoundSelect(GlanceClockAnimationChoice):
         self._attr_icon = "mdi:music-note"
 
 
-class GlanceClockFactorySceneSelect(GlanceClockEntity, SelectEntity):
+class GlanceClockFactorySceneSelect(GlanceClockEntity, SelectEntity, RestoreEntity):
     """Show one of the clock's own built-in faces.
 
     These are the faces the clock shipped with -- calendar, weather, smile and
-    the rest -- selected by writing one byte to scene_data. That is the same
-    characteristic the Busy binary sensor reads, which is how we learned it is a
-    register rather than a status byte.
+    the rest -- selected by writing one byte to scene_data. `off` returns the
+    clock to the plain time.
 
-    Nothing here draws anything: the faces belong to the firmware, and a face
-    that has no data behind it shows as little as an empty slot does. `off`
-    returns the clock to the plain time.
+    One-way on purpose. An earlier version of this read the same characteristic
+    back to find out which face was showing, and that was wrong in a way worth
+    recording: what the clock *pushes* on scene_data is its display status, not
+    the face number you wrote. 0x81 is an idle clock with its digits on, and
+    decoding it as a face made this control announce "calendar" every time any
+    unrelated setting was touched -- the clock pushes a status byte after each
+    one. The face was never selected; the control invented it.
+
+    So the number goes out and nothing is read back. The selection is restored
+    from Home Assistant across restarts, the same way the animation choices are,
+    and it is a record of what was last sent rather than a claim about what the
+    clock is doing.
     """
 
     _attr_entity_category = EntityCategory.CONFIG
@@ -286,44 +293,11 @@ class GlanceClockFactorySceneSelect(GlanceClockEntity, SelectEntity):
         )
 
     async def async_added_to_hass(self) -> None:
-        """Follow the clock's own pushes, and read once to start."""
+        """Restore what was last sent. Nothing is read from the clock."""
         await super().async_added_to_hass()
-
-        @callback
-        def _handle(event):
-            if event.data.get("address") != self._mac_address:
-                return
-            if event.data.get("characteristic") != "scene_data":
-                return
-            payload = event.data.get("bytes") or []
-            if not payload:
-                return
-            name = decode_factory_scene(payload[0])
-            if name is not None:
-                self._attr_current_option = name
-                self.async_write_ha_state()
-
-        self.async_on_remove(
-            self.hass.bus.async_listen("glance_clock_notification", _handle)
-        )
-        await self._read_now()
-
-    async def _read_now(self) -> None:
-        """Read which face the clock says it is on, if it is reachable."""
-        if not self._connection_manager or not self._connection_manager.is_connected:
-            return
-        try:
-            data = await self._connection_manager.read_characteristic(
-                SCENE_DATA_CHARACTERISTIC_UUID
-            )
-        except Exception as err:  # noqa: BLE001 -- bleak raises broadly
-            _LOGGER.debug("Could not read the current factory scene: %s", err)
-            return
-        if data:
-            name = decode_factory_scene(bytes(data)[0])
-            if name is not None:
-                self._attr_current_option = name
-                self.async_write_ha_state()
+        last = await self.async_get_last_state()
+        if last and last.state in FACTORY_SCENES:
+            self._attr_current_option = last.state
 
     async def async_select_option(self, option: str) -> None:
         """Write one face number to scene_data."""

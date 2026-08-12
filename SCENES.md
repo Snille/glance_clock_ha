@@ -18,7 +18,7 @@ on the display rather than announce itself and go away.
 - [Timing](#timing)
 - [Worked examples](#worked-examples)
 - [Things that will look like bugs](#things-that-will-look-like-bugs)
-- [Two things not yet settled](#two-things-not-yet-settled)
+- [Settled, and still open](#settled-and-still-open)
 
 ## The display, physically
 
@@ -386,9 +386,15 @@ own — calendar, weather, rain, smile, the timers. They are on the device page 
 the **Factory Scene** select, and `off` returns the clock to the plain time.
 
 Nothing you send affects them and nothing they do affects your slots. They are
-selected by writing one byte to the `scene_data` characteristic, which is the
-same byte the **Busy** binary sensor reads: bit 7 set means the named face is
-not currently on screen, which is exactly what the sensor calls idle.
+selected by writing one byte to the `scene_data` characteristic.
+
+**The control is one-way, and that is deliberate.** What the clock *pushes* on
+`scene_data` is its display status, not the face number you wrote. Reading it
+back to find out which face is showing does not work, and 1.29.0 shipped a
+version that tried: `0x81` — an idle clock with its digits on — decodes as
+face 1, the calendar. Since the clock pushes a status byte after any setting is
+touched, the control announced a face nobody had selected, every time anything
+was toggled. It now sends the number and reads nothing.
 
 A face with no data behind it draws about as much as an empty slot does.
 
@@ -580,21 +586,22 @@ daylight faces unless you move them; start yours at 3.
 **The effect did nothing.** `pulse`, `wave` and `light_flash` modulate an area
 that has already been drawn. Put a fill step before them.
 
-## Two things not yet settled
+## Settled, and still open
 
-Both come from comparing notes with
+Both questions came from comparing notes with
 [mrmstn/glance_clock_ha](https://github.com/mrmstn/glance_clock_ha), a parallel
-implementation that reaches parts of the firmware this one had not. Where the
-two disagree, neither reading has been disproved.
+implementation that reaches parts of the firmware this one had not.
 
-**What the low bits of `scene_data` mean.** The Busy sensor reads bit 0 as "the
-digital time is on screen", so `0x81` is an idle clock showing its digits. The
-factory-scene table reads the low seven bits as a face number, which makes
-`0x81` an inactive calendar face. Both fit every sample watched so far.
-Selecting a face from the device page and watching the sensor's `raw` attribute
-should settle it.
+**Settled: `scene_data` reads and writes are not the same thing.** The question
+was whether the low bits of that byte are a face number or a display status. The
+answer is both, depending on direction. Written, the low bits select one of the
+clock's own faces. Pushed, they are status — bit 0 is the digital time, and bit
+7 is idle. The evidence was accidental: a version that decoded pushed bytes as
+faces reported "calendar" every time an unrelated setting was toggled, because
+toggling anything makes the clock push `0x81`. A face number would not change
+when you alter the date format.
 
-**What commands 30 and 31 do.** Here they are stop and start scene playback,
+**Still open: what commands 30 and 31 do.** Here they are stop and start scene playback,
 because 31 is what every scene write already sends and the scene that comes up
 is the one just written — if it advanced a carousel, something else would
 appear. The other implementation calls them `previous_scene` and `next_scene`.
