@@ -398,6 +398,14 @@ was toggled. It now sends the number and reads nothing.
 
 A face with no data behind it draws about as much as an empty slot does.
 
+**A selected face replays.** It is a scene like any other, so the engine comes
+back to it on each pass and plays it again — left alone, it repeats
+indefinitely. `off` is what stops it.
+
+**It does not block your own scenes.** Watched 2026-08-12 with `smile` selected:
+an animation sent to a slot still ran. The face and your slots take turns rather
+than competing.
+
 ## The state word
 
 The clock pushes two bytes on `scene_state` whenever what they say changes. They
@@ -585,6 +593,16 @@ daylight faces unless you move them; start yours at 3.
 
 **The effect did nothing.** `pulse`, `wave` and `light_flash` modulate an area
 that has already been drawn. Put a fill step before them.
+
+**Nothing displays at all, whatever slot you use, and it is late.** Check the
+quiet window. On the evening of 2026-08-12 no scene would show at any slot with
+Do Not Disturb in force; moving the window so it was no longer in force brought
+them straight back. That is one test each way rather than a proven rule — the
+confirming leg, setting the window *back* over the current hour and watching
+them vanish again, has not been run. But it is the first thing to check before
+suspecting the slots.
+
+`binary_sensor.<name>_do_not_disturb` answers it without guesswork.
 
 ## Settled, and still open
 
