@@ -1,0 +1,162 @@
+[
+    {
+        "id": "glance_progress_tab",
+        "type": "tab",
+        "label": "Glance Clock - progress ring",
+        "disabled": false,
+        "info": "Turns any 0-100 sensor into an arc on the outer ring, with a dim track\nbehind it so an empty ring still reads as a ring.\n\nChange the entity id in the trigger node and the SENSOR constant in the\nfunction node. The inject node is there so you can redraw without waiting\nfor the sensor to change.\n\nThe arc is 48 pixels for 100%, because each ring has 48 LEDs. Pixel 0 is at\ntwelve o'clock and numbering runs clockwise, so the arc grows the way a\nclock hand moves."
+    },
+    {
+        "id": "gp_trigger",
+        "type": "server-state-changed",
+        "z": "glance_progress_tab",
+        "name": "the value",
+        "server": "",
+        "version": 6,
+        "outputs": 1,
+        "exposeAsEntityConfig": "",
+        "entities": {
+            "entity": [
+                "sensor.car_battery_level"
+            ],
+            "substring": [],
+            "regex": []
+        },
+        "outputInitially": true,
+        "stateType": "num",
+        "ignoreCurrentStateUnknown": true,
+        "ignoreCurrentStateUnavailable": true,
+        "outputProperties": [
+            {
+                "property": "payload",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            }
+        ],
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "gp_build"
+            ]
+        ]
+    },
+    {
+        "id": "gp_manual",
+        "type": "inject",
+        "z": "glance_progress_tab",
+        "name": "redraw now",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "64",
+        "payloadType": "num",
+        "x": 150,
+        "y": 160,
+        "wires": [
+            [
+                "gp_build"
+            ]
+        ]
+    },
+    {
+        "id": "gp_build",
+        "type": "function",
+        "z": "glance_progress_tab",
+        "name": "value -> arc",
+        "func": "// 48 pixels to a ring, so one percent is a little under half a pixel.\nconst PIXELS = 48;\n\n// Which slot to own. Slot 0 belongs to the animation buttons on the device\n// page and slot 1 to send_forecast, so start your own scenes at 2.\nconst SLOT = 3;\n\nconst pct = Number(msg.payload);\nif (Number.isNaN(pct)) {\n    // unavailable, unknown, or a restart in progress -- draw nothing rather\n    // than drawing something wrong\n    return null;\n}\n\n// Floor, then clamp: a length of 0 is invalid and the service call would\n// fail, and a length above 48 runs off the end of the ring.\nlet length = Math.floor((Math.min(Math.max(pct, 0), 100) / 100) * PIXELS);\nlength = Math.min(Math.max(length, 1), PIXELS);\n\n// The palette is fixed -- these are names from it, not arbitrary colours.\nlet color = 'lime';\nif (pct < 20) {\n    color = 'red';\n} else if (pct < 50) {\n    color = 'dark_orange';\n}\n\nmsg.action = 'glance_clock.set_leds';\nmsg.payload = {\n    slot: SLOT,\n    mode: 'watchface',\n    segments: [\n        // Painted in order, so the dim track has to come first and the\n        // value is drawn over it.\n        { start: 0, length: PIXELS, ring: 0, color: 'dark_green' },\n        { start: 0, length: length, ring: 0, color: color },\n    ],\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 100,
+        "wires": [
+            [
+                "gp_call"
+            ]
+        ]
+    },
+    {
+        "id": "gp_call",
+        "type": "api-call-service",
+        "z": "glance_progress_tab",
+        "name": "draw it",
+        "server": "",
+        "version": 7,
+        "debugenabled": false,
+        "action": "",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": false,
+        "domain": "",
+        "service": "",
+        "x": 610,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "gp_clear_inject",
+        "type": "inject",
+        "z": "glance_progress_tab",
+        "name": "take it off the clock",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 240,
+        "wires": [
+            [
+                "gp_clear"
+            ]
+        ]
+    },
+    {
+        "id": "gp_clear",
+        "type": "function",
+        "z": "glance_progress_tab",
+        "name": "clear the slot",
+        "func": "// A scene stays in its slot and replays until something clears it. Ending\n// a lifetime does not remove it, and neither does sending nothing.\nmsg.action = 'glance_clock.clear_leds';\nmsg.payload = { slot: 3 };\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 240,
+        "wires": [
+            [
+                "gp_call"
+            ]
+        ]
+    }
+]

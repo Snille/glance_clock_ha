@@ -1,0 +1,84 @@
+# A comet running round the rings, with a fading tail.
+#
+# Twelve steps of 4 pixels each, 0.2 s apart -- all the way round in 2.4
+# seconds. Each step draws three areas:
+#
+#   black         where the tail was two steps ago  (this is the whole trick)
+#   royal_blue    where the head was last step
+#   white         the head
+#
+# Without the black segment you get a ring slowly filling up instead of a comet
+# going round, because anything drawn stays on screen after its step ends.
+#
+# This is the case where Node-RED beats YAML: the same thing is a six-line for
+# loop in a function node. See ../../node-red/comet.json.
+#
+# 2.4 seconds is well under the clock's ~15 second scene cycle, so it runs,
+# finishes, and visibly waits before repeating. Pad the timeline out towards 15
+# seconds if you want continuous motion.
+
+action: glance_clock.set_scene
+data:
+  slot: 3
+  mode: watchface
+  steps:
+    - seconds: 0.2
+      segments:
+        - { start: 40, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 44, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 0, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 44, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 0, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 4, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 0, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 4, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 8, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 4, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 8, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 12, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 8, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 12, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 16, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 12, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 16, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 20, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 16, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 20, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 24, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 20, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 24, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 28, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 24, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 28, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 32, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 28, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 32, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 36, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 32, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 36, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 40, length: 4, ring: 0, rings_tall: 4, color: white }
+    - seconds: 0.2
+      segments:
+        - { start: 36, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 40, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
+        - { start: 44, length: 4, ring: 0, rings_tall: 4, color: white }

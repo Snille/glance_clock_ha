@@ -1,0 +1,20 @@
+# A ring that fills up over three seconds.
+#
+# Six steps, each adding to what the last one drew. This works because anything
+# drawn stays on screen after its step ends -- the clock does not clear between
+# frames. Nothing paints over anything here, so the ring accumulates.
+#
+# The whole timeline goes up in ONE call. Sending fills one at a time cannot
+# animate: a scene change only takes effect on the clock's own ~15 second cycle.
+
+action: glance_clock.set_scene
+data:
+  slot: 3
+  mode: watchface
+  steps:
+    - { seconds: 0.5, start: 0, length: 8, rings_tall: 4, color: royal_blue }
+    - { seconds: 0.5, start: 8, length: 8, rings_tall: 4, color: royal_blue }
+    - { seconds: 0.5, start: 16, length: 8, rings_tall: 4, color: royal_blue }
+    - { seconds: 0.5, start: 24, length: 8, rings_tall: 4, color: royal_blue }
+    - { seconds: 0.5, start: 32, length: 8, rings_tall: 4, color: royal_blue }
+    - { seconds: 0.5, start: 40, length: 8, rings_tall: 4, color: royal_blue }

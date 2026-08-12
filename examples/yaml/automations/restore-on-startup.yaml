@@ -1,0 +1,26 @@
+# Put the scenes back after a restart.
+#
+# Scenes live on the clock, but the automations that computed them do not run
+# while Home Assistant is down, so what is displayed may no longer match
+# reality. Reconnecting is a good moment to recompute.
+#
+# The ring automations here each carry a `homeassistant` start trigger of their
+# own, which covers the same ground. This version is for when you would rather
+# have the ordering and the delay in one place.
+
+alias: Restore clock scenes on startup
+description: Recompute the standing scenes once Bluetooth has found the clock
+triggers:
+  - trigger: homeassistant
+    event: start
+actions:
+  - delay: "00:01:00" # let Bluetooth find the clock first
+  - action: automation.trigger
+    target:
+      entity_id:
+        - automation.car_charge_on_the_clock
+        - automation.workday_band
+        - automation.electricity_price_ring
+    data:
+      skip_condition: false
+mode: single

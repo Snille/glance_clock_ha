@@ -1,0 +1,17 @@
+# Quarter markers: four pixels at the hour positions.
+#
+# 48 pixels over 12 hours means one hour is exactly 4 pixels, so twelve is
+# pixel 0, three o'clock is 12, six is 24 and nine is 36.
+#
+# Useful as a permanent frame of reference in its own slot, under whatever else
+# you are drawing.
+
+action: glance_clock.set_leds
+data:
+  slot: 4
+  mode: watchface
+  segments:
+    - { start: 0, length: 1, ring: 0, color: white }
+    - { start: 12, length: 1, ring: 0, color: white }
+    - { start: 24, length: 1, ring: 0, color: white }
+    - { start: 36, length: 1, ring: 0, color: white }

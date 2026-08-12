@@ -1,0 +1,170 @@
+[
+    {
+        "id": "glance_comet_tab",
+        "type": "tab",
+        "label": "Glance Clock - generated scene",
+        "disabled": false,
+        "info": "A comet running round the rings, with a fading tail.\n\nThe point of this flow is not the comet. It is that a scene is a timeline\nyou upload in ONE call and the clock then plays by itself at 50 frames per\nsecond -- so animation means generating a list of steps, which is a loop in\na function node and a page of copy-paste in YAML.\n\nSending fills one at a time cannot animate: a scene change only takes\neffect on the clock's own ~15 second cycle, so a series of calls gives you\na stutter, not motion.\n\nThe second function node builds a 'breathing' scene the same way, to show\nthe shape generalising. Change COLOR and SLOT to taste."
+    },
+    {
+        "id": "gc_inject",
+        "type": "inject",
+        "z": "glance_comet_tab",
+        "name": "run the comet",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 100,
+        "wires": [
+            [
+                "gc_build"
+            ]
+        ]
+    },
+    {
+        "id": "gc_build",
+        "type": "function",
+        "z": "glance_comet_tab",
+        "name": "generate the timeline",
+        "func": "// Geometry: 48 pixels to a ring, pixel 0 at twelve o'clock, clockwise.\nconst PIXELS = 48;\nconst STEP = 4;              // 4 pixels is one hour on the dial\nconst SECONDS_PER_STEP = 0.2;\nconst SLOT = 3;\n\nconst HEAD = 'white';\nconst TAIL = 'royal_blue';\n\nconst steps = [];\n\nfor (let i = 0; i < PIXELS / STEP; i++) {\n    const head = (i * STEP) % PIXELS;\n    const tail = (head - STEP + PIXELS) % PIXELS;\n    const gone = (head - 2 * STEP + 2 * PIXELS) % PIXELS;\n\n    steps.push({\n        seconds: SECONDS_PER_STEP,\n        segments: [\n            // Anything drawn stays on screen after its step ends, so the\n            // black segment is what makes this a comet instead of a ring\n            // slowly filling up.\n            { start: gone, length: STEP, ring: 0, rings_tall: 4, color: 'black' },\n            { start: tail, length: STEP, ring: 0, rings_tall: 4, color: TAIL },\n            { start: head, length: STEP, ring: 0, rings_tall: 4, color: HEAD },\n        ],\n    });\n}\n\n// Twelve steps at 0.2s is 2.4 seconds, well under the clock's ~15 second\n// cycle -- so it runs, finishes, and visibly waits before repeating. Pad\n// the timeline out towards 15 seconds if you want continuous motion.\n\nmsg.action = 'glance_clock.set_scene';\nmsg.payload = {\n    slot: SLOT,\n    mode: 'watchface',\n    steps: steps,\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 100,
+        "wires": [
+            [
+                "gc_call"
+            ]
+        ]
+    },
+    {
+        "id": "gc_breathe_inject",
+        "type": "inject",
+        "z": "glance_comet_tab",
+        "name": "run the breather",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 180,
+        "wires": [
+            [
+                "gc_breathe"
+            ]
+        ]
+    },
+    {
+        "id": "gc_breathe",
+        "type": "function",
+        "z": "glance_comet_tab",
+        "name": "fill, then pulse it",
+        "func": "// pulse, wave and light_flash do not draw anything themselves -- they\n// modulate an area that has already been drawn in the same scene. So the\n// effect step has to come after a fill covering the same area.\nconst SLOT = 3;\nconst COLOR = 'royal_blue';\nconst AREA = { start: 0, length: 48, ring: 0, rings_tall: 4, color: COLOR };\n\nmsg.action = 'glance_clock.set_scene';\nmsg.payload = {\n    slot: SLOT,\n    mode: 'watchface',\n    steps: [\n        { seconds: 0.2, segments: [AREA] },\n        {\n            type: 'effect',\n            effect: 'pulse',\n            rise: 20,\n            fall: 80,\n            seconds: 14,\n            segments: [AREA],\n        },\n    ],\n};\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 180,
+        "wires": [
+            [
+                "gc_call"
+            ]
+        ]
+    },
+    {
+        "id": "gc_clear_inject",
+        "type": "inject",
+        "z": "glance_comet_tab",
+        "name": "stop and clear",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 260,
+        "wires": [
+            [
+                "gc_clear"
+            ]
+        ]
+    },
+    {
+        "id": "gc_clear",
+        "type": "function",
+        "z": "glance_comet_tab",
+        "name": "clear the slot",
+        "func": "msg.action = 'glance_clock.clear_leds';\nmsg.payload = { slot: 3 };\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 400,
+        "y": 260,
+        "wires": [
+            [
+                "gc_call"
+            ]
+        ]
+    },
+    {
+        "id": "gc_call",
+        "type": "api-call-service",
+        "z": "glance_comet_tab",
+        "name": "to the clock",
+        "server": "",
+        "version": 7,
+        "debugenabled": false,
+        "action": "",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": false,
+        "domain": "",
+        "service": "",
+        "x": 640,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    }
+]

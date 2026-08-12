@@ -1,0 +1,17 @@
+# A countdown that empties.
+#
+# The reverse of ring-fill.yaml: paint the whole ring, then eat it with black.
+#
+# black is not transparent, it is paint. Filling an area with black is how you
+# erase it.
+
+action: glance_clock.set_scene
+data:
+  slot: 3
+  mode: watchface
+  steps:
+    - { seconds: 1, start: 0, length: 48, rings_tall: 4, color: dark_orange }
+    - { seconds: 1, start: 0, length: 12, rings_tall: 4, color: black }
+    - { seconds: 1, start: 12, length: 12, rings_tall: 4, color: black }
+    - { seconds: 1, start: 24, length: 12, rings_tall: 4, color: black }
+    - { seconds: 1, start: 36, length: 12, rings_tall: 4, color: black }

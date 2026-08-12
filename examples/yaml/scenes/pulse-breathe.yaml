@@ -1,0 +1,31 @@
+# A ring that breathes.
+#
+# pulse, wave and light_flash do NOT draw anything themselves -- they modulate
+# an area that has already been drawn in the same scene. So the effect step has
+# to come after a fill covering the same area. An effect on its own does
+# nothing, which looks exactly like a broken service call.
+#
+# The three, as observed on hardware:
+#   pulse        the area breathes, dimming and brightening in place
+#   wave         runs across the rings from the inside out, not around them
+#   light_flash  flashes at uneven intervals, and REPLACES the area's colour
+#                rather than layering over it
+#
+# 14 seconds is chosen to fill the clock's ~15 second scene cycle, so the
+# breathing looks continuous rather than pausing between repeats.
+
+action: glance_clock.set_scene
+data:
+  slot: 3
+  mode: watchface
+  steps:
+    - seconds: 0.2
+      segments:
+        - { start: 0, length: 48, ring: 0, rings_tall: 4, color: royal_blue }
+    - type: effect
+      effect: pulse
+      rise: 20
+      fall: 80
+      seconds: 14
+      segments:
+        - { start: 0, length: 48, ring: 0, rings_tall: 4, color: royal_blue }

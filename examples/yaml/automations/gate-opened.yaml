@@ -1,0 +1,26 @@
+# Someone is at the gate, and the clock may already be talking.
+#
+# A notice sent while another one is playing is not queued -- it is lost. This
+# waits for the busy sensor before sending.
+#
+# continue_on_timeout: true is deliberate: after twenty seconds, sending and
+# possibly losing the message beats silently doing nothing.
+
+alias: Gate opened
+description: Announce the gate, waiting for the clock to be free first
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.gate
+    to: "on"
+actions:
+  - wait_template: "{{ is_state('binary_sensor.glance_clock_busy', 'off') }}"
+    timeout: "00:00:20"
+    continue_on_timeout: true
+  - action: glance_clock.send_notice
+    data:
+      text: "GRINDEN OPPEN"
+      animation: none
+      color: lawn_green
+      sound: hello
+mode: queued
+max: 5

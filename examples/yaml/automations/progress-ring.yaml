@@ -1,0 +1,39 @@
+# A progress ring from any 0-100 sensor. The workhorse.
+#
+# 48 pixels across 100%, so the length is the percentage times 0.48, floored,
+# and clamped to at least 1 -- a length of 0 is invalid and fails the call.
+#
+# Two details that are easy to get wrong:
+#   - Segments are painted IN ORDER, so the dim track has to come first.
+#   - A scene does not survive Home Assistant forgetting about it, which is why
+#     there is a homeassistant start trigger.
+
+alias: Car charge on the clock
+description: Draw a 0-100 sensor as an arc on the outer ring
+triggers:
+  - trigger: state
+    entity_id: sensor.car_battery_level
+  - trigger: homeassistant
+    event: start
+conditions:
+  - condition: template
+    value_template: "{{ states('sensor.car_battery_level') | is_number }}"
+actions:
+  - variables:
+      pct: "{{ states('sensor.car_battery_level') | float(0) }}"
+  - action: glance_clock.set_leds
+    data:
+      slot: 3
+      mode: watchface
+      segments:
+        # The dim track behind, so an empty ring still reads as a ring
+        - start: 0
+          length: 48
+          ring: 0
+          color: dark_green
+        # The value over it
+        - start: 0
+          length: "{{ [ (pct * 0.48) | round(0, 'floor') | int, 1 ] | max }}"
+          ring: 0
+          color: "{{ 'red' if pct < 20 else 'dark_orange' if pct < 50 else 'lime' }}"
+mode: single

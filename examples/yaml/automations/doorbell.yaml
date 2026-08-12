@@ -1,0 +1,23 @@
+# A doorbell that is worth hearing.
+#
+# max_exceeded: silent keeps the log clean when someone leans on the button.
+#
+# Note the transliterated text: the clock's font has no Ö, so writing DÖRREN
+# would give you a visible box instead. See SCENES.md on the font.
+
+alias: Doorbell on the clock
+description: Announce the doorbell immediately, as a notice rather than a scene
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.front_door_doorbell
+    to: "on"
+actions:
+  - action: glance_clock.send_notice
+    data:
+      text: "DORREN [icon:128]"
+      animation: pulse
+      color: dark_orange
+      sound: bells
+      priority: high
+mode: single
+max_exceeded: silent

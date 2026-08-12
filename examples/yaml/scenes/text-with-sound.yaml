@@ -1,0 +1,30 @@
+# Text, a sound and a background, all starting at the same instant.
+#
+# Three steps sharing `at: 0`. A step without `at` follows on from the previous
+# one, which is what you want almost every time -- give `at` explicitly when
+# steps should overlap or start together.
+#
+# mode: exclusive is required. In watchface mode the digital clockface owns the
+# matrix, so text has nowhere to go and simply never appears. The integration
+# logs a warning when you get this wrong.
+#
+# The font is limited: å and ä become a, ö becomes o, and anything with no glyph
+# is replaced by a visible box rather than dropped. [icon:133] is the sun.
+
+action: glance_clock.set_scene
+data:
+  slot: 3
+  mode: exclusive
+  steps:
+    - at: 0
+      seconds: 6
+      segments:
+        - { start: 0, length: 48, ring: 0, rings_tall: 4, color: indigo }
+    - at: 0
+      type: sound
+      sound: hello
+    - at: 0
+      type: text
+      text: "GOD MORGON [icon:133]"
+      scroll: repeat
+      seconds: 6

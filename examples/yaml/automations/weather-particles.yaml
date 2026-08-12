@@ -1,0 +1,68 @@
+# Weather particles that follow the weather.
+#
+# set_scene's `weather` step is a particle effect the clock draws itself -- snow
+# falling, rain streaking, fog drifting. It is not a forecast readout; for a
+# temperature graph use send_forecast, which writes to slot 1.
+#
+# Anything that is not one of the three conditions clears the slot, so the
+# display goes back to normal rather than snowing in June.
+
+alias: Weather particles
+description: Snow, rain or fog on the rings, from a weather entity
+triggers:
+  - trigger: state
+    entity_id: weather.home
+  - trigger: homeassistant
+    event: start
+actions:
+  - choose:
+      - conditions:
+          - condition: state
+            entity_id: weather.home
+            state: ["snowy", "snowy-rainy"]
+        sequence:
+          - action: glance_clock.set_scene
+            data:
+              slot: 2
+              mode: watchface
+              steps:
+                - type: weather
+                  condition: snow
+                  position: full
+                  intensity: 7
+                  seconds: 30
+      - conditions:
+          - condition: state
+            entity_id: weather.home
+            state: ["rainy", "pouring", "lightning-rainy"]
+        sequence:
+          - action: glance_clock.set_scene
+            data:
+              slot: 2
+              mode: watchface
+              steps:
+                - type: weather
+                  condition: rain
+                  position: full
+                  intensity: "{{ 10 if is_state('weather.home','pouring') else 6 }}"
+                  seconds: 30
+      - conditions:
+          - condition: state
+            entity_id: weather.home
+            state: "fog"
+        sequence:
+          - action: glance_clock.set_scene
+            data:
+              slot: 2
+              mode: watchface
+              steps:
+                - type: weather
+                  condition: fog
+                  position: lower
+                  intensity: 5
+                  seconds: 30
+    default:
+      - action: glance_clock.clear_leds
+        data:
+          slot: 2
+mode: single

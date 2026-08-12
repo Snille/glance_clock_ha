@@ -13,6 +13,11 @@ Home Assistant custom integration for Glance Clock devices via Bluetooth.
 > Glance Clock's manufacturer is gone and the servers with it, so a clock on the
 > wall has nothing left to talk to. This integration is how it gets used again.
 
+📖 **[SCENES.md](./SCENES.md)** — the rings, the fixed colour palette, and how to
+build your own animations · **[examples/](./examples/)** — automations, scripts,
+scenes and Node-RED flows, ready to copy · **[ICONS.md](./ICONS.md)** — the
+built-in glyphs
+
 <!-- [IMAGE: Banner image showing the Glance Clock device] -->
 
 ## Features
@@ -260,7 +265,8 @@ data:
 `mode` decides how the scene shares the display: `watchface` draws it alongside the
 digital time, `exclusive` hides the digital clockface, and `ring_and_text` alternates
 between the two. Colours are names from the clock's fixed palette -- there is no
-arbitrary RGB.
+arbitrary RGB. The full palette, the ring geometry and a set of worked examples are
+in [SCENES.md](./SCENES.md).
 
 ### Set Scene
 
@@ -428,6 +434,10 @@ Force refresh all entity states.
 
 ## Automations
 
+A dozen worked automations -- doorbell, washing machine, progress rings,
+electricity price, weather particles, and the patterns behind them -- are in
+**[examples/yaml/](./examples/yaml/)**, one per file. One to start with:
+
 ### Weather Forecast Automation
 
 Automatically update your Glance Clock with weather forecast data whenever it changes.
@@ -498,10 +508,11 @@ The clock will now automatically display a 24-hour temperature forecast with col
 ## Driving it from Node-RED
 
 Everything is a Home Assistant service call, so Node-RED needs no special node.
-There are two worked examples in [`examples/node-red/`](./examples/node-red/) --
-weather on the rings, and an espresso machine announcing itself when it comes up
-to temperature -- along with the handful of things worth knowing before you
-start.
+There are five worked flows in [`examples/node-red/`](./examples/node-red/) --
+weather on the rings, an espresso machine announcing itself when it comes up to
+temperature, any sensor as a progress arc, a queue that stops notices being
+lost, and a scene generated in code -- along with the handful of things worth
+knowing before you start.
 
 Three of those are worth repeating here, because each one looks like a bug the
 first time:

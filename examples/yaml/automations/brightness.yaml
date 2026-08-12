@@ -1,0 +1,39 @@
+# Brightness that follows the sun.
+#
+# The clock has an ambient light sensor and manages brightness on its own.
+# Brightness 0 hands control back to it. This is for overriding that, which is
+# mostly at night.
+#
+# Note the asymmetry: the light entity sets a manual level, and only
+# update_display_settings with 0 restores automatic mode.
+#
+# The clock's own light reading is not exposed over Bluetooth, so there is
+# nothing to build a smoother curve from. If you want a real lux value, that is
+# an external sensor's job.
+
+alias: Clock brightness
+description: Dim manually in the evening, back to automatic at sunrise
+triggers:
+  - trigger: sun
+    event: sunset
+    id: evening
+  - trigger: sun
+    event: sunrise
+    id: morning
+actions:
+  - choose:
+      - conditions:
+          - condition: trigger
+            id: evening
+        sequence:
+          - action: light.turn_on
+            target:
+              entity_id: light.glance_clock
+            data:
+              brightness: 40
+    default:
+      # Back to automatic: brightness 0 returns control to the light sensor
+      - action: glance_clock.update_display_settings
+        data:
+          displayBrightness: 0
+mode: single

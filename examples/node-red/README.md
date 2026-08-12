@@ -12,9 +12,16 @@ is short, and the interesting part is the payload rather than the wiring.
 |---|---|
 | `weather.json` | Turns a weather entity into snow, rain or fog on the rings |
 | `espresso.json` | Watches a temperature sensor and says when the machine is ready |
+| `progress-ring.json` | Turns any 0-100 sensor into an arc, with a dim track behind it |
+| `notice-queue.json` | Waits for the clock to be free before sending, so nothing is lost |
+| `comet.json` | Generates a scene timeline in code — the thing YAML is bad at |
 
-Import with **Menu → Import** and paste the file contents. Both flows reference
-entity ids you will need to change to your own.
+Import with **Menu → Import** and paste the file contents. Every flow
+references entity ids you will need to change to your own.
+
+For the drawing model these flows assume — ring geometry, the fixed palette,
+scene slots, step types — see [SCENES.md](../../SCENES.md). For the same ideas
+as Home Assistant automations, see [`../yaml/`](../yaml/).
 
 ## The two things worth knowing first
 
@@ -93,6 +100,75 @@ The second half of the flow sends a notice when the machine drops back below
 temperature. Leave it out if you find it chatty — it is there to show that a
 notice is cheap and that the clock is fine being talked to often.
 
+## A value as an arc
+
+`progress-ring.json` is the workhorse flow: a 0-100 sensor becomes an arc on
+the outer ring. Each ring is 48 pixels, so the length is the percentage times
+0.48 — floored, then clamped to at least 1, because a `length` of 0 is invalid
+and fails the call.
+
+```javascript
+let length = Math.floor((Math.min(Math.max(pct, 0), 100) / 100) * 48);
+length = Math.min(Math.max(length, 1), 48);
+```
+
+Two segments rather than one, painted in order: a dim `dark_green` track over
+the whole ring first, then the value drawn on top of it. Without the track an
+empty ring is just darkness, and it stops reading as a gauge.
+
+The flow also carries an inject node that clears the slot, because a scene does
+not leave on its own.
+
+## Not losing notices
+
+`notice-queue.json` exists because **a notice sent while another one is playing
+is not queued — it is lost**. The flow takes a notice on a link-in node, checks
+`binary_sensor.<name>_busy`, and loops through a two second delay until the
+clock is free. After ten tries it sends anyway and warns: after twenty seconds,
+a message that might collide beats a message that definitely never arrives.
+
+Send into it from any other flow with a link-out node:
+
+```javascript
+msg.payload = {
+    text: 'POSTEN [icon:128]',
+    color: 'dark_orange',
+    sound: 'hello',
+};
+return msg;
+```
+
+Anything left out is filled in by the flow, so a text alone is a valid message.
+
+## Generating a scene
+
+`comet.json` is the case where Node-RED genuinely beats YAML. A scene is a
+timeline you upload in **one** call, which the clock then plays by itself at 50
+frames per second — so animation means generating a list of steps, and a list
+of steps is a `for` loop in a function node against a page of copy-paste in an
+automation.
+
+```javascript
+for (let i = 0; i < 48 / 4; i++) {
+    const head = (i * 4) % 48;
+    const tail = (head - 4 + 48) % 48;
+    const gone = (head - 8 + 96) % 48;
+    steps.push({ seconds: 0.2, segments: [
+        { start: gone, length: 4, ring: 0, rings_tall: 4, color: 'black' },
+        { start: tail, length: 4, ring: 0, rings_tall: 4, color: 'royal_blue' },
+        { start: head, length: 4, ring: 0, rings_tall: 4, color: 'white' },
+    ]});
+}
+```
+
+The black segment is the whole trick. Anything drawn stays on screen after its
+step ends, so without it you get a ring slowly filling up rather than a comet
+going round. Both are useful — know which one you are building.
+
+The second half of the flow shows an `effect` step, which is a different animal:
+`pulse`, `wave` and `light_flash` do not draw anything themselves, they modulate
+an area **already drawn in the same scene**. The fill has to come first.
+
 ## Waiting for the clock to be free
 
 `binary_sensor.<name>_busy` is true while a notice or scene is playing. The
@@ -102,8 +178,9 @@ it is simply lost.
 
 The usual shape is a **current state** node checking the sensor is `off`
 before the call service node, with a short delay and a retry when it is not.
-Its attributes carry `digital_clock` and the raw byte, if you want to know
-whether the digital time is on screen.
+`notice-queue.json` is that shape, ready to import. Its attributes carry
+`digital_clock` and the raw byte, if you want to know whether the digital time
+is on screen.
 
 ## Sound
 

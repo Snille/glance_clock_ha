@@ -1,0 +1,28 @@
+# Clear the rings when the house is empty.
+#
+# Slots do not clear themselves, so leaving is a good moment to tidy up.
+#
+# Pair this with the reverse on arrival, or the clock stays mute and blank
+# until you notice and wonder what broke.
+#
+# Slot 6 is deliberately left alone: that is the leak alarm, which clears itself
+# when the sensor does. An alarm you wipe on your way out is not an alarm.
+
+alias: Clock quiet when away
+description: Clear every scene slot and mute the clock once everyone has left
+triggers:
+  - trigger: state
+    entity_id: group.family
+    to: "not_home"
+    for: "00:10:00"
+actions:
+  - repeat:
+      for_each: [2, 3, 4, 5]
+      sequence:
+        - action: glance_clock.clear_leds
+          data:
+            slot: "{{ repeat.item }}"
+  - action: switch.turn_on
+    target:
+      entity_id: switch.glance_clock_mute
+mode: single

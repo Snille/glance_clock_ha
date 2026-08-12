@@ -1,0 +1,25 @@
+# Kitchen timers.
+#
+# send_timer runs on the clock itself, so it keeps counting even if Home
+# Assistant restarts. Intervals chain, which is what makes it good for anything
+# with stages.
+#
+# For a single plain countdown, one interval is enough. `final_text` is what
+# stands on the display when it finishes, and it takes [icon:CODE] like any
+# other text.
+
+alias: Tea timer
+description: A two-stage timer the clock runs by itself
+triggers:
+  - trigger: event
+    event_type: tea_time
+actions:
+  - action: glance_clock.send_timer
+    data:
+      final_text: "TE KLART [icon:130]"
+      intervals:
+        - text: "SKOLJ"
+          duration: 30
+        - text: "DRAR"
+          duration: 180
+mode: single

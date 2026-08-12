@@ -1,0 +1,25 @@
+# The washing machine has finished.
+#
+# Power-based detection, with a `for:` so a pause in the cycle does not announce
+# itself, and an energy condition so it only fires on a day it actually ran.
+
+alias: Washing machine finished
+description: Announce the end of a cycle from the machine's power draw
+triggers:
+  - trigger: numeric_state
+    entity_id: sensor.washing_machine_power
+    below: 5
+    for: "00:03:00"
+conditions:
+  - condition: numeric_state
+    entity_id: sensor.washing_machine_energy_today
+    above: 0.1 # it actually ran today
+actions:
+  - action: glance_clock.send_notice
+    data:
+      text: "TVATTEN KLAR"
+      animation: wave
+      color: sky_blue
+      sound: complete
+      priority: medium
+mode: single

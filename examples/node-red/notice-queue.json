@@ -1,0 +1,182 @@
+[
+    {
+        "id": "glance_queue_tab",
+        "type": "tab",
+        "label": "Glance Clock - notice queue",
+        "disabled": false,
+        "info": "A notice sent while another one is playing is not queued -- it is lost.\nThis flow is the fix: it waits for binary_sensor.<name>_busy to go off\nbefore sending, retries a few times, and gives up rather than looping\nforever.\n\nSend anything into the 'glance notice' link-in node with msg.payload set to\nthe notice data, from any other flow:\n\n    msg.payload = { text: 'POSTEN [icon:128]', color: 'dark_orange',\n                    sound: 'hello', animation: 'pulse' };\n\nChange the entity id in the 'is the clock busy' node to match your clock."
+    },
+    {
+        "id": "gq_link_in",
+        "type": "link in",
+        "z": "glance_queue_tab",
+        "name": "glance notice",
+        "links": [],
+        "x": 105,
+        "y": 160,
+        "wires": [
+            [
+                "gq_check"
+            ]
+        ]
+    },
+    {
+        "id": "gq_test",
+        "type": "inject",
+        "z": "glance_queue_tab",
+        "name": "test message",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "{\"text\":\"HEJ [icon:134]\",\"color\":\"lawn_green\",\"sound\":\"hello\",\"animation\":\"pulse\"}",
+        "payloadType": "json",
+        "x": 140,
+        "y": 100,
+        "wires": [
+            [
+                "gq_check"
+            ]
+        ]
+    },
+    {
+        "id": "gq_check",
+        "type": "api-current-state",
+        "z": "glance_queue_tab",
+        "name": "is the clock busy",
+        "server": "",
+        "version": 3,
+        "outputs": 1,
+        "halt_if": "",
+        "halt_if_type": "str",
+        "halt_if_compare": "is",
+        "entity_id": "binary_sensor.glance_clock_busy",
+        "state_type": "str",
+        "blockInputOverrides": false,
+        "outputProperties": [
+            {
+                "property": "busy",
+                "propertyType": "msg",
+                "value": "",
+                "valueType": "entityState"
+            }
+        ],
+        "for": "0",
+        "forType": "num",
+        "forUnits": "minutes",
+        "override_topic": false,
+        "state_location": "busy",
+        "override_payload": "msg",
+        "entity_location": "data",
+        "override_data": "msg",
+        "x": 340,
+        "y": 160,
+        "wires": [
+            [
+                "gq_gate"
+            ]
+        ]
+    },
+    {
+        "id": "gq_gate",
+        "type": "function",
+        "z": "glance_queue_tab",
+        "name": "free, or wait",
+        "func": "// The busy sensor is reported by the clock itself and pushed on every\n// change, so this is something to wait on rather than guess at.\nconst MAX_TRIES = 10;   // 10 x 2s, so about twenty seconds of patience\n\nmsg.tries = (msg.tries || 0) + 1;\n\nif (msg.busy === 'off') {\n    delete msg.tries;\n    return [msg, null];\n}\n\nif (msg.tries >= MAX_TRIES) {\n    // Send it anyway. After twenty seconds, a message that might collide\n    // beats a message that definitely never arrives.\n    node.warn('clock still busy after ' + MAX_TRIES + ' tries, sending anyway');\n    delete msg.tries;\n    return [msg, null];\n}\n\nreturn [null, msg];\n",
+        "outputs": 2,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 160,
+        "wires": [
+            [
+                "gq_send"
+            ],
+            [
+                "gq_wait"
+            ]
+        ]
+    },
+    {
+        "id": "gq_wait",
+        "type": "delay",
+        "z": "glance_queue_tab",
+        "name": "wait 2s",
+        "pauseType": "delay",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 560,
+        "y": 240,
+        "wires": [
+            [
+                "gq_check"
+            ]
+        ]
+    },
+    {
+        "id": "gq_send",
+        "type": "function",
+        "z": "glance_queue_tab",
+        "name": "build the call",
+        "func": "// Fill in whatever the caller left out, so a flow can send just a text.\nconst notice = Object.assign({\n    animation: 'pulse',\n    color: 'white',\n    sound: 'none',\n    priority: 'medium',\n}, msg.payload || {});\n\nif (!notice.text) {\n    node.error('a notice needs text', msg);\n    return null;\n}\n\nmsg.action = 'glance_clock.send_notice';\nmsg.payload = notice;\nreturn msg;\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 160,
+        "wires": [
+            [
+                "gq_call"
+            ]
+        ]
+    },
+    {
+        "id": "gq_call",
+        "type": "api-call-service",
+        "z": "glance_queue_tab",
+        "name": "send it",
+        "server": "",
+        "version": 7,
+        "debugenabled": false,
+        "action": "",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": false,
+        "domain": "",
+        "service": "",
+        "x": 970,
+        "y": 160,
+        "wires": [
+            []
+        ]
+    }
+]

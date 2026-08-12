@@ -1,0 +1,17 @@
+# A gauge with a track behind it.
+#
+# Paste into Developer Tools -> Actions -> YAML mode and run it.
+#
+# Two segments in one call, painted IN ORDER: the full ring dim first, then the
+# value over it. Without the track an empty ring is just darkness, and it stops
+# reading as a gauge.
+#
+# For a live value, see ../automations/progress-ring.yaml.
+
+action: glance_clock.set_leds
+data:
+  slot: 3
+  mode: watchface
+  segments:
+    - { start: 0, length: 48, ring: 0, color: dark_green }
+    - { start: 0, length: 32, ring: 0, color: lime }

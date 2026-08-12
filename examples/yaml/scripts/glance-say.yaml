@@ -1,0 +1,54 @@
+# A reusable notice script.
+#
+# Rather than repeating the busy-sensor wait in every automation, put it here
+# once. Goes in configuration.yaml under `script:`, or in scripts.yaml.
+#
+# mode: queued is the point. Several automations can call it at once and the
+# messages come out one after another, instead of overwriting each other -- a
+# notice sent while another one plays is not queued by the clock, it is lost.
+#
+# Call it with:
+#
+#   - action: script.glance_say
+#     data:
+#       text: "POSTEN [icon:128]"
+#       color: dark_orange
+#       sound: hello
+
+glance_say:
+  alias: Say on the Glance Clock
+  mode: queued
+  max: 10
+  fields:
+    text:
+      description: The message. Supports [icon:CODE].
+      required: true
+      selector:
+        text:
+    color:
+      description: Palette colour name
+      default: white
+      selector:
+        text:
+    sound:
+      description: Sound name, or none
+      default: none
+      selector:
+        text:
+    animation:
+      description: Notice animation
+      default: pulse
+      selector:
+        text:
+  sequence:
+    # continue_on_timeout: after twenty seconds, sending and possibly losing
+    # the message beats silently doing nothing.
+    - wait_template: "{{ is_state('binary_sensor.glance_clock_busy', 'off') }}"
+      timeout: "00:00:20"
+      continue_on_timeout: true
+    - action: glance_clock.send_notice
+      data:
+        text: "{{ text }}"
+        color: "{{ color }}"
+        sound: "{{ sound }}"
+        animation: "{{ animation }}"

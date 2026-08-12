@@ -1,0 +1,52 @@
+# A leak, loudly.
+#
+# Two things at once: a scene that is the standing state, and a repeated notice
+# that gets you out of your chair. The scene is cleared when the sensor does.
+#
+# `priority` is a byte the firmware interprets, and how it weighs one notice
+# against another is the firmware's business. Whether `critical` overrides a DND
+# window has NOT been tested here, so do not build a smoke alarm on the
+# assumption. The value of reserving it for cases like this is that you can tell
+# them apart in the log.
+
+alias: Water leak
+description: Flash the rings red and keep announcing until the sensor clears
+triggers:
+  - trigger: state
+    entity_id: binary_sensor.laundry_leak
+    to: "on"
+actions:
+  - action: glance_clock.set_scene
+    data:
+      slot: 6
+      mode: exclusive
+      steps:
+        # The fill first: light_flash modulates an area already drawn, it does
+        # not draw one itself.
+        - seconds: 0.5
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 4, color: red }
+        - type: effect
+          effect: light_flash
+          color: red
+          seconds: 14
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 4, color: red }
+  - repeat:
+      while:
+        - condition: state
+          entity_id: binary_sensor.laundry_leak
+          state: "on"
+      sequence:
+        - action: glance_clock.send_notice
+          data:
+            text: "VATTENLACKA [icon:144]"
+            animation: pulse
+            color: red
+            sound: radar
+            priority: critical
+        - delay: "00:00:30"
+  - action: glance_clock.clear_leds
+    data:
+      slot: 6
+mode: single

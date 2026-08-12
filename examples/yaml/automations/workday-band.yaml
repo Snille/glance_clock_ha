@@ -1,0 +1,30 @@
+# The workday as an arc, in its real position on the dial.
+#
+# The rings are 48 pixels and a clock face is 12 hours, so one hour is exactly
+# 4 pixels and the geometry does the work for you:
+#
+#     start  = (hour % 12) * 4
+#     length = hours * 4
+#
+# An arc that runs past pixel 47 has to be split into two segments -- the clock
+# does not wrap. Anything crossing twelve o'clock needs `start: N, length: 48-N`
+# plus a second segment starting at 0.
+
+alias: Workday band
+description: Draw 08:00-17:00 as a band on the innermost ring
+triggers:
+  - trigger: time
+    at: "00:01:00"
+  - trigger: homeassistant
+    event: start
+actions:
+  - action: glance_clock.set_leds
+    data:
+      slot: 4
+      mode: watchface
+      segments:
+        - start: 32 # 08:00  ->  (8 % 12) * 4
+          length: 36 # nine hours -> 9 * 4
+          ring: 3
+          color: royal_blue
+mode: single
