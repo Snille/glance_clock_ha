@@ -15,7 +15,10 @@ automation → ⋮ → Edit in YAML**, replacing everything in the editor. Or dr
 file's contents into `automations.yaml` as a list item.
 
 **`scripts/`** — goes under `script:` in `configuration.yaml`, or into
-`scripts.yaml` as-is.
+`scripts.yaml` as-is. The exception is `demo-and-self-test.yaml`, which is
+written for the UI script editor instead: it starts at `alias:` with no key
+above it, so it can be pasted whole into **Scripts → Add script → Edit in
+YAML**. It is meant to be run once and watched.
 
 **`scenes/`** — single service calls, not Home Assistant scenes. Paste into
 **Developer Tools → Actions → YAML mode** and press Perform action. They are
@@ -91,7 +94,7 @@ with the mute flag alongside as an attribute.
 |---|---|
 | [`glance-say.yaml`](scripts/glance-say.yaml) | `script.glance_say` — one queued entry point for every notice |
 | [`clear-all-slots.yaml`](scripts/clear-all-slots.yaml) | `script.glance_clear_all` — empty every slot when an experiment goes wrong |
-| [`demo-and-self-test.yaml`](scripts/demo-and-self-test.yaml) | Three minutes that exercise everything, in an order that reads as a demo |
+| [`demo-and-self-test.yaml`](scripts/demo-and-self-test.yaml) | Under two minutes that exercise everything, in an order that reads as a demo |
 
 `glance_say` is worth having even in a small setup: `mode: queued` means several
 automations can call it at once and the messages come out one after another

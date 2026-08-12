@@ -1,3 +1,9 @@
+# Unlike its neighbours in this directory, this file is in the form the UI
+# script editor wants -- it starts at `alias:` with no key above it. Paste the
+# whole thing into Settings -> Automations & Scenes -> Scripts -> Add script ->
+# Edit in YAML. It is meant to be run once and watched, not kept in
+# scripts.yaml; add a key of your own above it if you want it there.
+
 alias: Glance Clock - full demo and self test
 description: >-
   Walks everything the integration can do, in an order that reads as a demo.
