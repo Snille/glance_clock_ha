@@ -171,8 +171,14 @@ Once configured, the integration provides:
   `pulse`, `wave` and `light_flash` need no YAML either
 - **Sound controls** - a Sound select and a Sound Play button for auditioning the eighteen sounds
 - **Sensors** - Battery level, and Last Notification showing anything the clock pushes on its own
-- **Binary sensor** - Busy, true while a notice or scene is playing. The clock reports this
-  itself, so it is something to wait on rather than guess at
+- **Binary sensors**
+  - **Busy**, true while a notice or scene is playing. The clock reports this itself, so
+    it is something to wait on rather than guess at
+  - **Do Not Disturb**, true while the quiet window is in force. Also the clock's own
+    answer, pushed the moment it changes, with the mute flag carried alongside as an
+    attribute. Setting the DND schedule says when the clock *should* be quiet; this says
+    whether it is quiet *now*, which is what an automation needs before deciding a notice
+    is worth sending
 - **Notify** - Send notifications via `notify.glance_clock`
 
 
