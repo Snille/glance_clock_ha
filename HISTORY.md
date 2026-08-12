@@ -7,6 +7,13 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.26.2] - 2026-08-12
+### Changed
+- Animation Slot is a slider rather than a spin box. Eight steps is short enough to drag
+  across without overshooting, and picking a slot is choosing among a few rather than
+  typing a value. The DND hour numbers stay as boxes -- twenty-four steps is too many to
+  drag accurately, and an hour is a value people know before they reach for it.
+
 ## [1.26.1] - 2026-08-12
 ### Fixed
 - **The README documented a `notify.glance_clock` service that has never existed.** Home

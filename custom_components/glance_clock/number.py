@@ -212,10 +212,13 @@ class GlanceClockAnimationSlotNumber(GlanceClockEntity, NumberEntity, RestoreEnt
     there will overwrite each other -- whichever arrives second wins.
     """
 
+    # A slider rather than a box: eight steps is short enough to drag across
+    # without overshooting, and picking a slot is a choice among a few rather
+    # than a value being typed.
     _attr_native_min_value = 0
     _attr_native_max_value = 7
     _attr_native_step = 1
-    _attr_mode = NumberMode.BOX
+    _attr_mode = NumberMode.SLIDER
 
     def __init__(self, config_entry, mac_address, device_name, connection_manager):
         """Initialize the animation slot number."""

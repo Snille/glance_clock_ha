@@ -99,3 +99,12 @@ def test_the_number_covers_every_slot_the_firmware_has():
     slot_class = source.split("class GlanceClockAnimationSlotNumber")[1]
     assert "_attr_native_min_value = 0" in slot_class
     assert "_attr_native_max_value = 7" in slot_class
+
+
+def test_the_slot_is_a_slider():
+    # Erik asked for a drag rather than up-and-down arrows. Pinned because it
+    # is a deliberate choice and a one-word edit away from being lost.
+    source = (COMPONENT / "number.py").read_text(encoding="utf-8")
+    slot_class = source.split("class GlanceClockAnimationSlotNumber")[1]
+    assert "NumberMode.SLIDER" in slot_class
+    assert "NumberMode.BOX" not in slot_class
