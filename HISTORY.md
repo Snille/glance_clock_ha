@@ -7,6 +7,21 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.26.0] - 2026-08-12
+### Added
+- **An Animation Slot control on the device page.** The animation buttons were fixed to
+  slot 0, so a second animation replaced the first and putting one anywhere else meant
+  dropping into YAML. The slot is part of the shared animation state now, alongside the
+  colour and the speed, and it survives a restart like they do.
+
+  Animation Stop follows it: it clears whichever slot is selected rather than always slot
+  0, since a Stop that clears a different slot from the one Run filled would leave the
+  animation running and be worse than no button at all. There is a test pinning that.
+
+  Defaults to 0, which is where the buttons have always written -- anyone upgrading has
+  habits built on it. Slot 1 belongs to `send_forecast`, so park a second animation at 2
+  or above.
+
 ## [1.25.0] - 2026-08-12
 ### Changed
 - **The slot is no longer cleared before a scene is written.** Writing to a slot that is

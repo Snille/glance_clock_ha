@@ -168,9 +168,11 @@ Once configured, the integration provides:
 - **Buttons** - Calibrate Hands, Confirm Hand Positions at 12, Animation Run, Animation Stop,
   and **Clear All Scenes**, which empties all eight slots. A scene replays until something
   clears it, so this is the way back when you no longer have the call that started it
-- **Animation controls** - Animation, Animation Colour and Animation Speed, driving Animation Run.
-  The Animation select carries the firmware animations *and* the three effects, so
-  `pulse`, `wave` and `light_flash` need no YAML either
+- **Animation controls** - Animation, Animation Colour, Animation Speed and **Animation
+  Slot**, driving Animation Run. The Animation select carries the firmware animations *and*
+  the three effects, so `pulse`, `wave` and `light_flash` need no YAML either. Animation
+  Slot picks which of the eight slots Run writes to, so several animations can be parked at
+  once; Animation Stop clears whichever slot is selected
 - **Sound controls** - a Sound select and a Sound Play button for auditioning the eighteen sounds
 - **Sensors** - Battery level, and Last Notification showing anything the clock pushes on its own
 - **Binary sensors**

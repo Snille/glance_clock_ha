@@ -152,8 +152,9 @@ class GlanceClockConfirmHandsButton(GlanceClockCommandButton):
         self._attr_icon = "mdi:check-decagram-outline"
 
 
-#: The animation buttons drive this slot, so running one replaces the last
-#: rather than filling the clock's slots and making it cycle between them.
+#: Where the animation buttons write when nothing else is chosen. The Animation
+#: Slot number on the device page overrides it, so several animations can be
+#: parked at once; this is only the fallback if that state is missing.
 ANIMATION_SLOT = 0
 
 #: Slots the firmware has, 0-7. Everything the services accept is bounded by
@@ -224,7 +225,7 @@ class GlanceClockRunAnimationButton(GlanceClockButtonBase):
             segment,
             speed=speed,
             mode=ANIMATION_MODE,
-            slot=ANIMATION_SLOT,
+            slot=int(state.get("slot", ANIMATION_SLOT)),
         )
 
     async def _run_effect(self, effect: str, state: dict) -> None:
@@ -267,7 +268,9 @@ class GlanceClockRunAnimationButton(GlanceClockButtonBase):
             notify_service._connection_manager = self._connection_manager
 
         await notify_service.async_send_scene(
-            steps, mode=ANIMATION_MODE, slot=ANIMATION_SLOT
+            steps,
+            mode=ANIMATION_MODE,
+            slot=int(state.get("slot", ANIMATION_SLOT)),
         )
 
 
@@ -298,7 +301,10 @@ class GlanceClockStopAnimationButton(GlanceClockButtonBase):
         if self._connection_manager and not hasattr(notify_service, "_connection_manager"):
             notify_service._connection_manager = self._connection_manager
 
-        await notify_service.async_delete_scene(ANIMATION_SLOT)
+        # Whichever slot Animation Run is pointed at, so Stop undoes what Run
+        # just did rather than always clearing slot 0.
+        state = get_animation_state(self.hass, self._config_entry.entry_id)
+        await notify_service.async_delete_scene(int(state.get("slot", ANIMATION_SLOT)))
 
 
 class GlanceClockClearAllScenesButton(GlanceClockButtonBase):
