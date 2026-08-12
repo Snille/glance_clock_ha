@@ -7,6 +7,19 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.27.1] - 2026-08-12
+### Fixed
+- **A timer with no intervals now says so instead of displaying nothing.** `countdown` is
+  the delay *before* a timer starts, not the time it counts -- the stages live in
+  `intervals` -- so a call with a countdown and no intervals asks the clock to wait and
+  then run nothing. It does exactly that: the service succeeds, the clock accepts the
+  frame, and the display never changes. Filmed on hardware, thirty seconds of nothing.
+
+  1.22.0 made `intervals` optional in the schema because the handler tolerated its
+  absence, which was right as far as it went and missed that the result is useless. The
+  service now refuses it with a message explaining what the two fields actually mean, and
+  the field descriptions say the same.
+
 ## [1.27.0] - 2026-08-12
 ### Added
 - **A notify entity, so the clock can be a target like any phone.** `Platform.NOTIFY` was

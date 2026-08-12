@@ -4,7 +4,9 @@ send_timer:
   fields:
     countdown:
       name: "Countdown (seconds)"
-      description: "Time before timer starts."
+      description: >-
+        Delay before the timer starts. NOT how long it counts -- that is the
+        'duration' of each interval.
       required: false
       selector:
         number:
@@ -20,11 +22,13 @@ send_timer:
     intervals:
       name: "Intervals (optional)"
       description: |
-        List of timer intervals. Each interval can have:
+        The stages of the timer, and the part that makes it a timer at all. At
+        least one is required: a call without intervals reaches the clock and
+        displays nothing. Each interval can have:
           - text: string (supports [icon:CODE])
-          - duration: seconds (int)
+          - duration: seconds (int) -- how long this stage runs
           - countdown: seconds (int, optional)
-        Leave empty for a simple timer.
+        For a plain single countdown, give one interval with a duration.
       required: false
       selector:
         object:

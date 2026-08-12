@@ -4,9 +4,14 @@
 # Assistant restarts. Intervals chain, which is what makes it good for anything
 # with stages.
 #
-# For a single plain countdown, one interval is enough. `final_text` is what
-# stands on the display when it finishes, and it takes [icon:CODE] like any
-# other text.
+# For a single plain countdown, one interval is enough -- but there has to be
+# one. Verified on hardware 2026-08-12: `countdown` is the delay BEFORE the
+# timer starts, not the time it counts, so a call with a countdown and no
+# intervals reaches the clock and displays nothing at all. The service refuses
+# that since 1.27.1 rather than letting it look like a broken clock.
+#
+# `final_text` is what stands on the display once the intervals have run, and
+# it takes [icon:CODE] like any other text.
 
 alias: Tea timer
 description: A two-stage timer the clock runs by itself
