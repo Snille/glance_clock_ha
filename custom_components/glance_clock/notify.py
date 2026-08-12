@@ -353,10 +353,15 @@ class GlanceClockNotificationService(BaseNotificationService):
     async def _free_scene_slot(self, slot: int) -> None:
         """Delete whatever occupies a slot before writing a new scene into it.
 
-        The clock silently ignores a scene sent to a slot that is still playing.
-        It acknowledges the write, nothing appears, and nothing is logged --
-        which reads as a broken integration rather than a busy slot. Clearing
-        first costs one command and makes a send mean what it says.
+        Added in 1.14.0 on the theory that the clock silently ignores a scene
+        sent to a slot that is still playing. That theory was wrong: the silent
+        sends were a colour name the palette does not have, rejected before
+        anything reached the clock, and 1.15.0 fixed the real cause by raising
+        instead of logging. This clearing was never shown to fix anything.
+
+        It stays because it is cheap and harmless, and because removing it is a
+        hardware question nobody has put to the clock yet -- but do not read it
+        as evidence of a firmware behaviour. It is an unverified precaution.
 
         No refresh here: the write that follows asks for one, and redrawing an
         emptied slot on the way past would only show the gap.
