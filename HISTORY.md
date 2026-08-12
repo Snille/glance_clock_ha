@@ -7,6 +7,27 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.27.0] - 2026-08-12
+### Added
+- **A notify entity, so the clock can be a target like any phone.** `Platform.NOTIFY` was
+  listed but added no entity, which is why `notify.glance_clock` never existed; there is a
+  real one now, reached with `notify.send_message`.
+
+  `notify.send_message` carries a message and a title and nothing else -- checked against
+  the running Home Assistant 2026.8.1 rather than assumed. Overloading `title` to mean
+  "sound" was considered and rejected: an instance with eight notify entities will put the
+  clock in a generic list sooner or later, and something will send a real title. It would
+  fail, or worse, do nothing quietly.
+
+  So the settings ride in the message, in the bracket idiom the display text already uses
+  for `[icon:130]` -- `[sound:bells]`, `[anim:pulse]`, `[color:dark_orange]`,
+  `[priority:high]`, with `animation`, `effect` and `colour` accepted as spellings.
+  Markers are stripped from the text; anything unrecognised is left in it, so a message
+  that merely looks like one still arrives whole.
+
+  `glance_clock.send_notice` is unchanged and remains the way to reach everything the
+  firmware has. The entity is the lowest common denominator on purpose.
+
 ## [1.26.2] - 2026-08-12
 ### Changed
 - Animation Slot is a slider rather than a spin box. Eight steps is short enough to drag

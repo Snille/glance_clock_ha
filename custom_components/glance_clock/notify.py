@@ -1,8 +1,11 @@
 import logging
 import asyncio
+from homeassistant.components.notify import NotifyEntity, NotifyEntityFeature
 from homeassistant.components.notify.legacy import BaseNotificationService
+from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.exceptions import ServiceValidationError
 from .const import (DND_FIELD_NAMES, DOMAIN, GLANCE_SERVICE_UUID, RAW_SETTINGS_KEY,
                     SETTINGS_CHARACTERISTIC_UUID, SETTINGS_FIELD_NAMES)
 from bleak_retry_connector import BleakClientWithServiceCache
@@ -958,17 +961,84 @@ class GlanceClockNotificationService(BaseNotificationService):
             return False
 
 
+class GlanceClockNotifyEntity(NotifyEntity):
+    """A notify entity, so the clock can be a target like any phone.
+
+    Home Assistant's modern notify platform carries a message and a title and
+    nothing else, which is the right shape for a phone and a poor fit for a
+    clock that can pick a sound, an animation and a colour. Those ride in the
+    message as markers instead -- see utils/notice_markers.py for why title was
+    not overloaded to mean one of them.
+
+    This does not replace glance_clock.send_notice. That service reaches
+    everything the firmware has, and it is what an automation written for the
+    clock should use. This is for the automations written for everything.
+    """
+
+    _attr_supported_features = NotifyEntityFeature.TITLE
+    _attr_icon = "mdi:clock-alert-outline"
+
+    def __init__(self, entry: ConfigEntry, config_data: dict, service) -> None:
+        """Initialize the notify entity."""
+        self._entry = entry
+        self._service = service
+        self._mac_address = config_data.get("mac_address")
+        self._attr_name = None  # the device's own name is enough
+        self._attr_unique_id = f"{self._mac_address}_notify"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information."""
+        return DeviceInfo(
+            identifiers={(DOMAIN, self._mac_address)},
+            connections={("bluetooth", self._mac_address)},
+        )
+
+    async def async_send_message(self, message: str, title: str | None = None) -> None:
+        """Show a message, applying any settings its markers carry."""
+        from .services.notice import resolve_notice
+        from .utils.notice_markers import extract_notice_options
+
+        text, options = extract_notice_options(message or "")
+
+        # Title first, the way the old legacy path composed it. A generic
+        # sender uses it as a title and gets one; nothing here reinterprets it.
+        if title:
+            text = f"{title}: {text}" if text else title
+
+        if not text:
+            _LOGGER.warning("Cannot send an empty notification")
+            return
+
+        try:
+            notice = resolve_notice(options)
+        except (ValueError, TypeError) as err:
+            # A marker naming a colour or sound the firmware does not have.
+            # Raised so it reaches the caller rather than dying in the log.
+            raise ServiceValidationError(f"notify: {err}") from err
+
+        await self._service.async_send_notice(text=text, **notice)
+
+
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry, async_add_entities) -> bool:
-    """Set up the Glance Clock notification service."""
+    """Set up the Glance Clock notification service and its notify entity."""
     config_data = hass.data[DOMAIN][entry.entry_id]
 
-    # Create notification service
+    # This object is the integration's command layer, not a notify platform:
+    # send_notice, set_leds, set_scene and the rest all reach the clock through
+    # it. It lives here for historical reasons, which is why Platform.NOTIFY
+    # cannot simply be dropped.
     notify_service = GlanceClockNotificationService(config_data)
 
     # Store the service for access by entities
     if DOMAIN + "_notify" not in hass.data:
         hass.data[DOMAIN + "_notify"] = {}
     hass.data[DOMAIN + "_notify"][entry.entry_id] = notify_service
+
+    # And now an actual entity, so notify.send_message has something to target.
+    # Until 1.27.0 this platform added none, so notify.<clock> did not exist
+    # while the README insisted it did.
+    async_add_entities([GlanceClockNotifyEntity(entry, config_data, notify_service)])
 
     _LOGGER.info(
         f"Glance Clock notification service set up for {config_data.get('name')}")

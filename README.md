@@ -183,8 +183,8 @@ Once configured, the integration provides:
     attribute. Setting the DND schedule says when the clock *should* be quiet; this says
     whether it is quiet *now*, which is what an automation needs before deciding a notice
     is worth sending
-- **Notify** - `glance_clock.send_notice`. There is no `notify.glance_clock` entity;
-  see the note under Send Notification
+- **Notify** - a notify entity, so the clock can be a target like any phone. Use
+  `notify.send_message`; the settings ride in the message as markers, see below
 
 
 ## Using Icons in Notifications
@@ -201,12 +201,10 @@ Send a custom notification to your Glance Clock.
 
 **Service:** `glance_clock.send_notice`
 
-> Earlier versions of this README documented a `notify.glance_clock` service.
-> **It has never existed.** The integration lists `Platform.NOTIFY` and builds a
-> notification service object, but that object is its internal command layer --
-> everything else here talks to the clock through it -- and no notify entity is
-> ever registered. Anything calling `notify.glance_clock` fails, and Home
-> Assistant's own repairs will say so if you have Spook installed.
+> Note for anyone upgrading: this README used to document a `notify.glance_clock`
+> service, which never existed -- the platform registered no entity. Since 1.27.0
+> there **is** a notify entity, but it is the modern kind: target it with
+> `notify.send_message`, not `notify.glance_clock`.
 
 ```yaml
 action: glance_clock.send_notice
@@ -230,6 +228,41 @@ data:
 
 A name outside those lists raises and says what would have worked, rather than
 quietly sending white, silence or a pulse. Raw indices are still accepted.
+
+### Notify entity
+
+The clock is also a notify target, for the automations that were written for
+everything rather than for the clock:
+
+```yaml
+action: notify.send_message
+target:
+  entity_id: notify.glance_clock      # your clock's own name
+data:
+  title: "Posten"
+  message: "PAKET HAR KOMMIT [sound:bells] [anim:pulse] [color:dark_orange]"
+```
+
+`notify.send_message` carries a message and a title and nothing else, which is
+the right shape for a phone and a poor fit for a clock. So the settings ride in
+the message, in the same bracket idiom the display text already uses for
+`[icon:130]`:
+
+| Marker | Sets | Also spelled |
+|---|---|---|
+| `[sound:bells]` | The sound | |
+| `[anim:pulse]` | The animation | `[animation:...]`, `[effect:...]` |
+| `[color:red]` | The colour | `[colour:...]` |
+| `[priority:high]` | The priority | |
+
+Markers are removed from the text; anything unrecognised is left in it, so a
+message that merely looks like a marker still arrives whole. `title` stays a
+title and is put in front of the message -- it is deliberately *not* overloaded
+to mean one of the settings, because a generic sender will eventually put a real
+title there.
+
+For everything the firmware can do, use `glance_clock.send_notice` above. This
+entity is the lowest common denominator on purpose.
 
 ### Update Display Settings
 
