@@ -12,10 +12,13 @@ on the display rather than announce itself and go away.
 - [Building your own scene](#building-your-own-scene)
 - [Step types](#step-types)
 - [Scene slots](#scene-slots)
+- [The clock's own faces](#the-clocks-own-faces)
+- [The state word](#the-state-word)
 - [Display modes](#display-modes)
 - [Timing](#timing)
 - [Worked examples](#worked-examples)
 - [Things that will look like bugs](#things-that-will-look-like-bugs)
+- [Two things not yet settled](#two-things-not-yet-settled)
 
 ## The display, physically
 
@@ -362,7 +365,8 @@ what was there.
 |---|---|
 | 0 | The Animation Run button on the device page — and the default for every service |
 | 1 | `send_forecast` |
-| 2–7 | Yours |
+| 2 | `send_rain_forecast` and `send_daylight_forecast`, by default |
+| 3–7 | Yours |
 
 Two things sharing a slot means whichever arrives second wins, so give each of
 your own scenes a slot and write it down somewhere. Clearing:
@@ -374,6 +378,50 @@ data:
 ```
 
 This is also how the forecast comes off the clock — `clear_leds` with slot 1.
+
+## The clock's own faces
+
+Alongside the eight slots you write into, the firmware has a dozen faces of its
+own — calendar, weather, rain, smile, the timers. They are on the device page as
+the **Factory Scene** select, and `off` returns the clock to the plain time.
+
+Nothing you send affects them and nothing they do affects your slots. They are
+selected by writing one byte to the `scene_data` characteristic, which is the
+same byte the **Busy** binary sensor reads: bit 7 set means the named face is
+not currently on screen, which is exactly what the sensor calls idle.
+
+A face with no data behind it draws about as much as an empty slot does.
+
+## The state word
+
+The clock pushes two bytes on `scene_state` whenever what they say changes. They
+are one little-endian 16-bit word:
+
+| Bit | Meaning |
+|---|---|
+| 0–1 | Power-saving mode, 0–3 |
+| 0x0004 | Scenes enabled |
+| 0x0008 | Muted |
+| 0x0010 | Do Not Disturb in force |
+| 0x0020 | ANCS enabled |
+| 0x0040 | Hands failed to home |
+| 0x0080 | Homing in progress |
+| 0x0100 | Adjusting the time |
+| 0x0200 | On a cable |
+| 0x0400 | Waiting for homing to be confirmed |
+| 0x0800 | Motor failure |
+| 0x1000 | Charging |
+| 0x2000 | No data |
+
+The two that matter most are already entities — Do Not Disturb is a binary
+sensor with mute as an attribute. The rest is on the **State Word** diagnostic
+sensor.
+
+Worth knowing if you ever read these bytes by hand: this table replaced an
+earlier reading here that treated the second byte as a constant 0x22, because
+every sample captured ended in it. It is `cable_connected | no_data`, and it
+looked constant only because the clock it was captured from never leaves its
+cable.
 
 ## Display modes
 
@@ -526,7 +574,29 @@ rather than the middle: the last thing drawn has nobody to paint over it. Add a
 closing step of black.
 
 **Two scenes are fighting.** They share a slot. Slot 0 belongs to the device
-page's animation buttons and slot 1 to `send_forecast`; start yours at 2.
+page's animation buttons, slot 1 to `send_forecast`, and slot 2 to the rain and
+daylight faces unless you move them; start yours at 3.
 
 **The effect did nothing.** `pulse`, `wave` and `light_flash` modulate an area
 that has already been drawn. Put a fill step before them.
+
+## Two things not yet settled
+
+Both come from comparing notes with
+[mrmstn/glance_clock_ha](https://github.com/mrmstn/glance_clock_ha), a parallel
+implementation that reaches parts of the firmware this one had not. Where the
+two disagree, neither reading has been disproved.
+
+**What the low bits of `scene_data` mean.** The Busy sensor reads bit 0 as "the
+digital time is on screen", so `0x81` is an idle clock showing its digits. The
+factory-scene table reads the low seven bits as a face number, which makes
+`0x81` an inactive calendar face. Both fit every sample watched so far.
+Selecting a face from the device page and watching the sensor's `raw` attribute
+should settle it.
+
+**What commands 30 and 31 do.** Here they are stop and start scene playback,
+because 31 is what every scene write already sends and the scene that comes up
+is the one just written — if it advanced a carousel, something else would
+appear. The other implementation calls them `previous_scene` and `next_scene`.
+Whether the firmware also has carousel navigation, on these numbers or on
+others, is unknown.

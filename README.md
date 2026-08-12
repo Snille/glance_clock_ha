@@ -162,19 +162,26 @@ If the device doesn't appear automatically, you can manually add it:
 Once configured, the integration provides:
 
 - **Light** - Control brightness and power state
-- **Switches** - Digital Clock, Night Mode, Always Show Points, Mute
-- **Selects** - Date Format options
+- **Switches** - Digital Clock, Night Mode, Always Show Points, Mute, and **Do Not
+  Disturb Hold**, which sets the clock's own permanent quiet flag: "quiet until I say
+  otherwise", as against the schedule's "quiet between these hours"
+- **Selects** - Date Format, and **Factory Scene** for the clock's own built-in faces
+  (calendar, weather, rain, smile, the timers); `off` returns it to the plain time
 - **Numbers** - DND Start and DND End, the recurring quiet window stored on the clock
 - **Buttons** - Calibrate Hands, Confirm Hand Positions at 12, Animation Run, Animation Stop,
   and **Clear All Scenes**, which empties all eight slots. A scene replays until something
-  clears it, so this is the way back when you no longer have the call that started it
+  clears it, so this is the way back when you no longer have the call that started it.
+  Also **Stop Timer** and **Stop Alarm**, and **Scene Playback Start/Stop** for a clock
+  left with playback stopped by a power cycle
 - **Animation controls** - Animation, Animation Colour, Animation Speed and **Animation
   Slot**, driving Animation Run. The Animation select carries the firmware animations *and*
   the three effects, so `pulse`, `wave` and `light_flash` need no YAML either. Animation
   Slot picks which of the eight slots Run writes to, so several animations can be parked at
   once; Animation Stop clears whichever slot is selected
 - **Sound controls** - a Sound select and a Sound Play button for auditioning the eighteen sounds
-- **Sensors** - Battery level, and Last Notification showing anything the clock pushes on its own
+- **Sensors** - Battery level, Last Notification showing anything the clock pushes on its
+  own, and **State Word**, a diagnostic carrying everything else the clock says about
+  itself: charging, on a cable, hand-homing and motor failures, and its power-saving band
 - **Binary sensors**
   - **Busy**, true while a notice or scene is playing. The clock reports this itself, so
     it is something to wait on rather than guess at
@@ -182,7 +189,7 @@ Once configured, the integration provides:
     answer, pushed the moment it changes, with the mute flag carried alongside as an
     attribute. Setting the DND schedule says when the clock *should* be quiet; this says
     whether it is quiet *now*, which is what an automation needs before deciding a notice
-    is worth sending
+    is worth sending. Every other flag from the same push is on it as an attribute
 - **Notify** - a notify entity, so the clock can be a target like any phone. Use
   `notify.send_message`; the settings ride in the message as markers, see below
 
@@ -601,6 +608,11 @@ Recorded so it does not get investigated twice:
 ## Credits
 
 This integration uses protocol and implementation insights from [Hypfer's Glance Clock project](https://github.com/Hypfer/glance-clock). Special thanks to the original developers for documenting the Glance Clock protocol and providing a foundation for Bluetooth communication.
+
+The state flag table, the factory scene numbers, and the rain and daylight encoders come
+from [mrmstn/glance_clock_ha](https://github.com/mrmstn/glance_clock_ha) (MIT), a parallel
+implementation that took them from the official Android application. Reading it corrected
+two things documented wrongly here -- see the release notes for 1.29.0.
 
 ## Support
 

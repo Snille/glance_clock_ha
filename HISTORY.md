@@ -7,6 +7,67 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.29.0] - 2026-08-12
+### Added
+- **The clock's state word is decoded in full.** The two bytes it pushes on `scene_state`
+  are one little-endian word with twelve named flags, not a flag byte followed by a
+  constant. Beyond the Do Not Disturb and mute bits already known, it carries whether the
+  clock is charging, on a cable, whether the hands have failed to home, whether a motor
+  has failed, and which of four power-saving bands it is in. All of it was arriving on
+  every push and going unread. It lands as attributes on the **Do Not Disturb** sensor and
+  on a new **State Word** diagnostic sensor.
+- **`stop_timer` and `stop_alarm`.** `send_timer` could start a timer the clock runs
+  itself, and nothing could call it off short of clearing the display.
+- **`stop_scenes` and `start_scenes`**, for recovering a clock left with playback stopped
+  -- which a power cycle can do. All four are buttons on the device page.
+- **The clock's own built-in faces**, as a **Factory Scene** select: calendar, weather,
+  smile, the timers and the rest. Selected by writing one byte to `scene_data`.
+- **A Do Not Disturb Hold switch.** "Quiet until I say otherwise", as against the
+  schedule's "quiet between these hours". The clock applies it itself.
+- **`send_rain_forecast` and `send_daylight_forecast`.** The forecast face draws 24
+  numbers with a label; it was only ever pointed at temperature. Rain needs a weather
+  entity with an hourly forecast and is scaled rather than filtered. Daylight needs no
+  weather entity at all -- Home Assistant knows where the sun is. Both go to scene slot 2
+  so they can stand alongside the temperature forecast in slot 1.
+
+### Fixed
+- **`scene_state`'s second byte was never a constant.** It was recorded as "has never been
+  anything but 0x22" and treated as noise. It is `cable_connected | no_data`, and read as
+  a constant only because the clock it was captured from lives plugged in. Unplug it and
+  it becomes 0x20.
+- **The permanent Do Not Disturb flag was not unreachable.** The documentation said no
+  switch and no service parameter could touch it. The integration had been reading and
+  preserving it on every settings write the whole time -- it was unexposed, not
+  unreachable, and now it has a switch.
+
+### Changed
+- `async_send_forecast` takes a scene slot and a display mode. The third header byte had
+  been read here as "24 hours"; it is a display mode, and 8, 16 and 24 are the values the
+  official application uses.
+- `connection_manager` gained `write_characteristic`. `send_command` only ever writes to
+  the control characteristic, which is right for command frames and wrong for the byte
+  that selects a clock face.
+
+### Credit
+- The state flag table, the factory scene numbers, and the rain and daylight encoders
+  including their label templates come from
+  [mrmstn/glance_clock_ha](https://github.com/mrmstn/glance_clock_ha) (MIT), a parallel
+  implementation that took them from the official Android application. It reaches parts of
+  the firmware this integration had not, and reading it corrected two things we had
+  written down wrongly.
+
+### Open
+- **`scene_data`'s low bits have two readings.** The Busy sensor reads bit 0 as "the
+  digital time is on screen"; the factory scene table reads the low seven bits as a face
+  number, which would make 0x81 the calendar rather than a clock with its digits showing.
+  Both fit everything watched so far. Selecting a face from the device page and watching
+  the sensor's raw attribute will settle it.
+- **Commands 30 and 31 are disputed.** mrmstn/glance_clock_ha calls them `previous_scene`
+  and `next_scene`; this integration calls them stop and start scene playback, because 31
+  is what every scene write here already sends and the scene that appears is the one just
+  written. Whether the firmware also has carousel navigation, on these numbers or others,
+  is unknown.
+
 ## [1.28.2] - 2026-08-12
 ### Changed
 - Every string the clock displays in the examples is in English. They were written against
