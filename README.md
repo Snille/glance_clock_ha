@@ -165,7 +165,9 @@ Once configured, the integration provides:
 - **Switches** - Digital Clock, Night Mode, Always Show Points, Mute
 - **Selects** - Date Format options
 - **Numbers** - DND Start and DND End, the recurring quiet window stored on the clock
-- **Buttons** - Calibrate Hands, Confirm Hand Positions at 12, Animation Run, Animation Stop
+- **Buttons** - Calibrate Hands, Confirm Hand Positions at 12, Animation Run, Animation Stop,
+  and **Clear All Scenes**, which empties all eight slots. A scene replays until something
+  clears it, so this is the way back when you no longer have the call that started it
 - **Animation controls** - Animation, Animation Colour and Animation Speed, driving Animation Run.
   The Animation select carries the firmware animations *and* the three effects, so
   `pulse`, `wave` and `light_flash` need no YAML either

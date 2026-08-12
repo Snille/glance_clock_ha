@@ -13,9 +13,10 @@
 # This is the case where Node-RED beats YAML: the same thing is a six-line for
 # loop in a function node. See ../../node-red/comet.json.
 #
-# 2.4 seconds is well under the clock's ~15 second scene cycle, so it runs,
-# finishes, and visibly waits before repeating. Pad the timeline out towards 15
-# seconds if you want continuous motion.
+# Filmed on hardware 2026-08-12: the head advances four pixels every 0.2 s,
+# clockwise, exactly as written. The scene then sits still for about twelve
+# seconds before running again -- 2.4 seconds of motion inside a ~15 second
+# cycle. Pad the timeline out towards 15 seconds if you want continuous motion.
 
 action: glance_clock.set_scene
 data:
@@ -82,3 +83,10 @@ data:
         - { start: 36, length: 4, ring: 0, rings_tall: 4, color: black }
         - { start: 40, length: 4, ring: 0, rings_tall: 4, color: royal_blue }
         - { start: 44, length: 4, ring: 0, rings_tall: 4, color: white }
+    # Sweep up after yourself. Verified on hardware 2026-08-12: without this
+    # step the head and tail stay lit at eleven o'clock for the twelve seconds
+    # between repeats, because nothing ever paints over the last position.
+    - seconds: 0.2
+      segments:
+        - { start: 40, length: 4, ring: 0, rings_tall: 4, color: black }
+        - { start: 44, length: 4, ring: 0, rings_tall: 4, color: black }

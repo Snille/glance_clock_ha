@@ -75,17 +75,29 @@ data:
 ```
 
 The same window is on the device page as the **DND Start** and **DND End**
-number entities. It is separate from the permanent DND flag, which is a switch.
+number entities. The schedule is the only way to make the clock quiet: the
+firmware also has a permanent DND flag, but nothing exposes it — no switch, no
+service parameter — so it is preserved on write and otherwise unreachable.
+
+Whether the window is in force *right now* is a separate question, and the clock
+answers it: `binary_sensor.<name>_do_not_disturb`, pushed the moment it changes,
+with the mute flag alongside as an attribute.
 
 ## scripts/
 
 | File | What it does |
 |---|---|
 | [`glance-say.yaml`](scripts/glance-say.yaml) | `script.glance_say` — one queued entry point for every notice |
+| [`clear-all-slots.yaml`](scripts/clear-all-slots.yaml) | `script.glance_clear_all` — empty every slot when an experiment goes wrong |
 
-Worth having even in a small setup. `mode: queued` means several automations can
-call it at once and the messages come out one after another, instead of
-overwriting each other.
+`glance_say` is worth having even in a small setup: `mode: queued` means several
+automations can call it at once and the messages come out one after another
+instead of overwriting each other.
+
+`glance_clear_all` is the way out. A scene stays in its slot and replays until
+cleared, so an experiment that went wrong keeps going wrong on the wall — and
+the slot number is exactly the thing nobody writes down. There is a **Clear All
+Scenes** button on the device page that does the same in one click.
 
 ## scenes/
 

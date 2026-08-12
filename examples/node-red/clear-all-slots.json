@@ -1,0 +1,121 @@
+[
+    {
+        "id": "glance_clear_tab",
+        "type": "tab",
+        "label": "Glance Clock - clear every slot",
+        "disabled": false,
+        "info": "Empties all eight scene slots, one at a time.\n\nThe way out when the clock is showing something you no longer have the call\nfor. A scene stays in its slot and replays until it is cleared, and the slot\nnumber is exactly the thing nobody writes down.\n\nThere is a Clear All Scenes button on the device page that does the same in\none click. This is the version you can wire into a flow -- send anything into\nthe link-in node, or press the inject.\n\nThe delay node matters. The clock is being asked eight things in a row over\nBluetooth, and pacing them is the difference between eight cleared slots and\na connection that gives up halfway."
+    },
+    {
+        "id": "gcl_inject",
+        "type": "inject",
+        "z": "glance_clear_tab",
+        "name": "clear everything",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 120,
+        "wires": [
+            [
+                "gcl_fanout"
+            ]
+        ]
+    },
+    {
+        "id": "gcl_link_in",
+        "type": "link in",
+        "z": "glance_clear_tab",
+        "name": "glance clear all",
+        "links": [],
+        "x": 115,
+        "y": 180,
+        "wires": [
+            [
+                "gcl_fanout"
+            ]
+        ]
+    },
+    {
+        "id": "gcl_fanout",
+        "type": "function",
+        "z": "glance_clear_tab",
+        "name": "one message per slot",
+        "func": "// Slots 0-7 is everything the firmware has, so this needs no record of\n// which ones were actually used. Clearing an empty slot is harmless.\nconst SLOTS = 8;\n\nconst messages = [];\nfor (let slot = 0; slot < SLOTS; slot++) {\n    messages.push({\n        action: 'glance_clock.clear_leds',\n        payload: { slot: slot },\n    });\n}\n\n// Returning an array of messages sends them all at once, which is why the\n// delay node downstream is set to rate limit rather than to pause.\nreturn [messages];\n",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 390,
+        "y": 140,
+        "wires": [
+            [
+                "gcl_pace"
+            ]
+        ]
+    },
+    {
+        "id": "gcl_pace",
+        "type": "delay",
+        "z": "glance_clear_tab",
+        "name": "five a second",
+        "pauseType": "rate",
+        "timeout": "5",
+        "timeoutUnits": "seconds",
+        "rate": "5",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "allowrate": false,
+        "outputs": 1,
+        "x": 620,
+        "y": 140,
+        "wires": [
+            [
+                "gcl_call"
+            ]
+        ]
+    },
+    {
+        "id": "gcl_call",
+        "type": "api-call-service",
+        "z": "glance_clear_tab",
+        "name": "clear the slot",
+        "server": "",
+        "version": 7,
+        "debugenabled": false,
+        "action": "",
+        "floorId": [],
+        "areaId": [],
+        "deviceId": [],
+        "entityId": [],
+        "labelId": [],
+        "data": "",
+        "dataType": "jsonata",
+        "mergeContext": "",
+        "mustacheAltTags": false,
+        "outputProperties": [],
+        "queue": "none",
+        "blockInputOverrides": false,
+        "domain": "",
+        "service": "",
+        "x": 830,
+        "y": 140,
+        "wires": [
+            []
+        ]
+    }
+]

@@ -407,6 +407,21 @@ shorter than about 750 frames finishes, then sits there until the cycle brings
 it round again. If you want continuous motion, either build a timeline of
 roughly 15 seconds or accept the pause as part of the rhythm.
 
+Filmed on hardware 2026-08-12, which puts numbers on all of that. A 2.4 second
+comet ran its twelve steps at exactly four pixels per 0.2 s, then stood still
+for about twelve seconds before running again. A 14 second pulse never went
+dark at all, so a timeline built to fill the cycle does read as continuous.
+
+The same recording settled the effect timings: `rise: 20` and `fall: 80` gave a
+breath of almost exactly two seconds, which is 100 frames at 50 fps. The units
+are frames, and they behave.
+
+And one thing worth stealing: **a scene that draws has to sweep up after
+itself.** When the comet's last step left its head and tail lit, they stayed lit
+for the whole twelve second wait, because nothing ever painted over the final
+position. A closing step of black is the difference between an animation and an
+animation that leaves a smear on the wall.
+
 `life_time` on `set_leds` and `set_animation` is frames at 50 fps before the
 scene **stops animating**. It is not how long the scene is visible — a fill
 stays on screen afterwards, and the slot stays occupied either way.
@@ -470,6 +485,10 @@ that silently becomes white; everywhere else it raises with the full list.
 
 **The block smeared instead of moving.** Fills persist — paint black over the
 previous position.
+
+**Something stayed lit after the animation ended.** The same rule, at the end
+rather than the middle: the last thing drawn has nobody to paint over it. Add a
+closing step of black.
 
 **Two scenes are fighting.** They share a slot. Slot 0 belongs to the device
 page's animation buttons and slot 1 to `send_forecast`; start yours at 2.

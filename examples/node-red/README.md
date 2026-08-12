@@ -15,6 +15,7 @@ is short, and the interesting part is the payload rather than the wiring.
 | `progress-ring.json` | Turns any 0-100 sensor into an arc, with a dim track behind it |
 | `notice-queue.json` | Waits for the clock to be free before sending, so nothing is lost |
 | `comet.json` | Generates a scene timeline in code — the thing YAML is bad at |
+| `clear-all-slots.json` | Empties all eight slots, paced so Bluetooth keeps up |
 
 Import with **Menu → Import** and paste the file contents. Every flow
 references entity ids you will need to change to your own.

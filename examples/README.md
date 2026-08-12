@@ -7,9 +7,9 @@ actually drive it from.
 examples/
 ├── yaml/                  Home Assistant
 │   ├── automations/       12 automations, one per file
-│   ├── scripts/           a queued notice entry point
+│   ├── scripts/           a queued notice entry point, and a way out
 │   └── scenes/            7 service calls to run from Developer Tools
-└── node-red/              5 flows, importable
+└── node-red/              6 flows, importable
 ```
 
 | Directory | Start here |
@@ -80,6 +80,12 @@ these examples use 2 and up:
 | 5 | `electricity-price.yaml` |
 | 6 | `water-leak.yaml` |
 | 7 | Free |
+
+When you lose track of which slot holds what -- and you will -- there is a
+**Clear All Scenes** button on the device page, plus
+[`yaml/scripts/clear-all-slots.yaml`](yaml/scripts/clear-all-slots.yaml) and
+[`node-red/clear-all-slots.json`](node-red/clear-all-slots.json) for the same
+thing in a flow.
 
 Two things sharing a slot means whichever arrives second wins, so if you run
 several of these at once, give each one its own number.

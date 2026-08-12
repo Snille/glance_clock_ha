@@ -1,0 +1,37 @@
+# Empty every scene slot.
+#
+# The way out when the clock is showing something you no longer have the call
+# for. A scene stays in its slot and replays until it is cleared, so an
+# experiment that went wrong keeps going wrong on the wall -- and the slot
+# number is exactly the thing nobody writes down.
+#
+# There is a Clear All Scenes button on the device page that does the same in
+# one click. This is the version for automations, and for reading.
+#
+# Goes under `script:` in configuration.yaml, or into scripts.yaml as-is.
+# Clearing an empty slot is harmless, so there is nothing to check first, and
+# nothing to undo if you run it twice.
+#
+#   - action: script.glance_clear_all
+#
+# It does not touch the notice queue or the display settings -- only scenes.
+# The digital clockface comes back on its own once the slots are empty.
+
+glance_clear_all:
+  alias: Clear every scene on the Glance Clock
+  icon: mdi:layers-remove
+  mode: single
+  sequence:
+    - repeat:
+        # Slots 0-7 is everything the firmware has, so this needs no record of
+        # which ones were actually used.
+        for_each: [0, 1, 2, 3, 4, 5, 6, 7]
+        sequence:
+          - action: glance_clock.clear_leds
+            data:
+              slot: "{{ repeat.item }}"
+          # The clock is being asked eight things in a row over Bluetooth, and
+          # giving it a moment between them is the difference between eight
+          # cleared slots and a connection that gives up halfway.
+          - delay:
+              milliseconds: 200

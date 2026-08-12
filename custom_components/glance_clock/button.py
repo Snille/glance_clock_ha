@@ -58,6 +58,8 @@ async def async_setup_entry(
                 config_entry, mac_address, name, connection_manager),
             GlanceClockPlaySoundButton(
                 config_entry, mac_address, name, connection_manager),
+            GlanceClockClearAllScenesButton(
+                config_entry, mac_address, name, connection_manager),
         ]
     )
 
@@ -153,6 +155,10 @@ class GlanceClockConfirmHandsButton(GlanceClockCommandButton):
 #: The animation buttons drive this slot, so running one replaces the last
 #: rather than filling the clock's slots and making it cycle between them.
 ANIMATION_SLOT = 0
+
+#: Slots the firmware has, 0-7. Everything the services accept is bounded by
+#: this, so clearing all of them needs no bookkeeping of what was used.
+SCENE_SLOTS = 8
 
 #: Watchface: the animation and the digital time show at once. Verified on
 #: hardware -- mode 24 alternates between them instead.
@@ -293,6 +299,50 @@ class GlanceClockStopAnimationButton(GlanceClockButtonBase):
             notify_service._connection_manager = self._connection_manager
 
         await notify_service.async_delete_scene(ANIMATION_SLOT)
+
+
+class GlanceClockClearAllScenesButton(GlanceClockButtonBase):
+    """Empty every scene slot, whoever filled it.
+
+    The way out when the clock is displaying something you no longer have the
+    call for. A scene stays in its slot and replays until it is cleared, so an
+    experiment that went wrong keeps going wrong on the wall until somebody
+    remembers which slot it went into -- and the slot number is exactly the
+    thing nobody writes down.
+    """
+
+    def __init__(self, config_entry, mac_address, device_name, connection_manager):
+        """Initialize the clear all scenes button."""
+        super().__init__(config_entry, mac_address, device_name, connection_manager)
+        self._attr_name = f"{device_name} Clear All Scenes"
+        self._attr_unique_id = f"{mac_address}_clear_all_scenes"
+        self._attr_icon = "mdi:layers-remove"
+
+    @property
+    def available(self) -> bool:
+        """Return True if entity is available."""
+        return self._connection_manager.is_connected
+
+    async def async_press(self) -> None:
+        """Delete every slot the firmware has."""
+        notify_service = self.hass.data.get(DOMAIN + "_notify", {}).get(
+            self._config_entry.entry_id
+        )
+        if not notify_service:
+            _LOGGER.error("Notification service not available for scenes")
+            return
+
+        if self._connection_manager and not hasattr(notify_service, "_connection_manager"):
+            notify_service._connection_manager = self._connection_manager
+
+        # Every slot, one at a time, carrying on past a failure: a slot that
+        # refuses is no reason to leave the other seven filled, and clearing an
+        # empty slot is harmless.
+        for slot in range(SCENE_SLOTS):
+            try:
+                await notify_service.async_delete_scene(slot)
+            except Exception as err:  # noqa: BLE001 -- bleak raises broadly
+                _LOGGER.warning("Could not clear scene slot %d: %s", slot, err)
 
 
 class GlanceClockPlaySoundButton(GlanceClockButtonBase):

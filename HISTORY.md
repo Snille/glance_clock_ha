@@ -7,6 +7,45 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.23.0] - 2026-08-12
+### Added
+- **A Do Not Disturb binary sensor.** The quiet window was write-only: the schedule could
+  be set, but nothing said whether the clock was quiet *right now* -- which is what an
+  automation wants to know before deciding a notice is worth sending. The clock was
+  already answering it on `scene_state`, two bytes pushed the moment the answer changes.
+  Decoded on hardware by moving the window across the current time and toggling mute:
+
+      04 22   nothing suppressed
+      14 22   the quiet window is in force
+      0c 22   muted
+
+  Bit 4 is DND, bit 3 is mute, and bit 2 was set in every sample. Night mode and
+  brightness pushed nothing at all, which fits: the characteristic is about whether the
+  clock may speak, not how it looks. Mute rides along as an attribute rather than its own
+  entity, because it arrives in the same push and answers the neighbouring question.
+
+- **A Clear All Scenes button**, and the same thing as a script and a Node-RED flow. A
+  scene replays until something clears it, so an experiment that went wrong keeps going
+  wrong on the wall -- and the slot number is exactly the thing nobody writes down.
+
+### Fixed
+- **The comet example left a smear.** Filmed on hardware: it ran its twelve steps at four
+  pixels per 0.2 s exactly as written, then left its head and tail lit at eleven o'clock
+  for the twelve seconds until the scene ran again, because nothing ever painted over the
+  final position. It sweeps up after itself now, and SCENES.md says why -- the persistence
+  rule applies at the end of a timeline as much as in the middle.
+
+- Documentation claimed a permanent DND switch that does not exist. The firmware has the
+  flag and the integration preserves it on write, but nothing exposes it: no switch, no
+  service parameter. The schedule is the only way to make the clock quiet.
+
+### Verified on hardware
+- The scene cycle, with numbers: 2.4 seconds of motion followed by about twelve seconds
+  standing still. A 14 second pulse never went dark, so a timeline built to fill the cycle
+  does read as continuous.
+- Effect timings are frames at 50 fps and behave: `rise: 20` with `fall: 80` gave a breath
+  of almost exactly two seconds.
+
 ## [1.22.0] - 2026-08-12
 ### Fixed
 - **`notify.glance_clock` could not have worked with named values.** The platform passed
