@@ -7,6 +7,30 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.25.0] - 2026-08-12
+### Changed
+- **The slot is no longer cleared before a scene is written.** Writing to a slot that is
+  still playing works: the new scene replaces the old one and shows at once. Verified by
+  sending two raw CustomScene frames to the same slot with nothing in between -- red, then
+  lime -- and watching the ring turn lime immediately, with a cleared-first control to
+  prove the second frame was valid.
+
+  That clearing was added in 1.14.0 on the theory that the clock silently ignores a scene
+  sent to an occupied slot. The theory was disproven the same week -- the silent sends were
+  a colour outside the palette, rejected before anything reached the clock -- but the
+  precaution stayed, and it is what made a scene take fifteen seconds to appear. 1.24.0
+  compensated for that with a refresh command; this removes the cause instead.
+
+  One command less on every `set_leds`, `set_scene` and `set_animation`, which is worth
+  having on a progress ring that redraws whenever its sensor moves.
+
+### Added
+- A test that every `self.x()` in the notification service has a method behind it. Removing
+  the slot-clearing took the refresh helper with it -- the two sat next to each other --
+  and left four calls pointing at nothing. That compiles, imports, and passes every other
+  test in the suite; it fails only when the clock is asked to do the thing. Checked against
+  a deliberately renamed method, so the guard is known to bite.
+
 ## [1.24.1] - 2026-08-12
 ### Documentation
 - **A notice empties the scene slot.** It does not borrow the display and hand it back:

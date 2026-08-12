@@ -350,23 +350,13 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.debug(f"Could not read settings from device: {e}")
             return None
 
-    async def _free_scene_slot(self, slot: int) -> None:
-        """Delete whatever occupies a slot before writing a new scene into it.
-
-        Added in 1.14.0 on the theory that the clock silently ignores a scene
-        sent to a slot that is still playing. That theory was wrong: the silent
-        sends were a colour name the palette does not have, rejected before
-        anything reached the clock, and 1.15.0 fixed the real cause by raising
-        instead of logging. This clearing was never shown to fix anything.
-
-        It stays because it is cheap and harmless, and because removing it is a
-        hardware question nobody has put to the clock yet -- but do not read it
-        as evidence of a firmware behaviour. It is an unverified precaution.
-
-        No refresh here: the write that follows asks for one, and redrawing an
-        emptied slot on the way past would only show the gap.
-        """
-        await self.async_delete_scene(slot, refresh=False)
+    #: Writing to a slot that is still playing works: the new scene replaces the
+    #: old one and shows at once. Verified on hardware 2026-08-12 by sending two
+    #: raw CustomScene frames to the same slot with nothing in between -- red,
+    #: then lime -- and watching the ring turn lime immediately. The clearing
+    #: that used to happen before every write was added in 1.14.0 on a theory
+    #: that had already been disproven, and it is what made a scene take fifteen
+    #: seconds to appear.
 
     async def _refresh_scene_playback(self) -> None:
         """Make a scene that has just been written take effect now.
@@ -415,8 +405,6 @@ class GlanceClockNotificationService(BaseNotificationService):
         try:
             from .glance_pb2 import CustomScene  # type: ignore
             from .utils.led_utils import METHOD_FILL
-
-            await self._free_scene_slot(slot)
 
             scene = CustomScene()
             obj = scene.object.add()
@@ -472,8 +460,6 @@ class GlanceClockNotificationService(BaseNotificationService):
                 METHOD_TEXT,
                 METHOD_WEATHER,
             )
-
-            await self._free_scene_slot(slot)
 
             scene = CustomScene()
             for step in steps:
@@ -570,8 +556,6 @@ class GlanceClockNotificationService(BaseNotificationService):
                 METHOD_GIF,
                 METHOD_MOVING_BAR,
             )
-
-            await self._free_scene_slot(slot)
 
             scene = CustomScene()
             obj = scene.object.add()
