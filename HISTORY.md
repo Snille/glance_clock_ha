@@ -7,6 +7,37 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.21.1] - 2026-08-12
+### Documentation
+- **SCENES.md** writes down what was previously only discoverable by reading `const.py`
+  and `led_utils.py`: the ring geometry (48 pixels, pixel 0 at twelve o'clock, so one
+  hour is exactly four pixels), the fixed 25-colour palette with the aliases for the
+  four names everyone reaches for first, the five scene step types, and which of the
+  eight slots are already spoken for.
+
+  It ends with the list of things that look like broken hardware and are not -- the
+  fifteen second scene cycle, scenes persisting in their slot, text refusing to render
+  in watchface mode, firmware animations rounding lengths down to a multiple of eight, a
+  black-tinted animation drawing nothing at all. Each of those has cost somebody an
+  evening at least once.
+
+- **The examples move into `examples/` and split by tool.** `yaml/automations` for
+  twelve automations, `yaml/scripts` for a queued notice entry point, `yaml/scenes` for
+  calls to run from Developer Tools, `node-red/` for the flows. `examples/README.md` is
+  the way in, and each subdirectory says where its files are meant to be pasted.
+
+- Three Node-RED flows added, chosen for what they teach. `progress-ring` is the
+  arithmetic everyone needs. `notice-queue` is the busy-sensor wait, packaged, because a
+  notice sent while another one plays is lost rather than queued. `comet` is the case
+  where Node-RED genuinely wins: a scene is one uploaded timeline, so animating means
+  generating steps -- a `for` loop there against twelve near-identical stanzas in YAML.
+  Both versions ship, to be compared.
+
+  None of this is hardware-tested; it is written from the code, which is why two claims
+  are hedged rather than stated. The palette's hex values are the CSS colours the names
+  come from and not measured output, and whether `critical` priority overrides a DND
+  window is recorded as untested rather than guessed at.
+
 ## [1.21.0] - 2026-08-11
 ### Added
 - The forecast now labels its temperatures **°F** when that is what Home Assistant is
