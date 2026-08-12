@@ -7,6 +7,14 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.28.2] - 2026-08-12
+### Changed
+- Every string the clock displays in the examples is in English. They were written against
+  a Swedish clock and shipped in an English repository, which is a small thing that makes a
+  project look unfinished. The font note in `doorbell.yaml` stays and now explains the
+  transliteration for anyone whose messages will not be in English, rather than
+  demonstrating it by accident.
+
 ## [1.28.1] - 2026-08-12
 ### Changed
 - The demo script runs in under two minutes instead of three. Every wait was sized for the

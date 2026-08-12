@@ -301,7 +301,7 @@ Puts a string on the matrix. Unlike a notice, it **stays**.
 
 ```yaml
 - type: text
-  text: "Ute: -3[icon:176]C"
+  text: "Outside: -3[icon:176]C"
   scroll: repeat        # none | repeat | rapid | delay
   seconds: 10
 ```

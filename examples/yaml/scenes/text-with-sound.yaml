@@ -25,6 +25,6 @@ data:
       sound: hello
     - at: 0
       type: text
-      text: "GOD MORGON [icon:133]"
+      text: "GOOD MORNING [icon:133]"
       scroll: repeat
       seconds: 6

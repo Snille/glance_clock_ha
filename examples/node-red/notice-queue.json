@@ -4,7 +4,7 @@
         "type": "tab",
         "label": "Glance Clock - notice queue",
         "disabled": false,
-        "info": "A notice sent while another one is playing is not queued -- it is lost.\nThis flow is the fix: it waits for binary_sensor.<name>_busy to go off\nbefore sending, retries a few times, and gives up rather than looping\nforever.\n\nSend anything into the 'glance notice' link-in node with msg.payload set to\nthe notice data, from any other flow:\n\n    msg.payload = { text: 'POSTEN [icon:128]', color: 'dark_orange',\n                    sound: 'hello', animation: 'pulse' };\n\nChange the entity id in the 'is the clock busy' node to match your clock."
+        "info": "A notice sent while another one is playing is not queued -- it is lost.\nThis flow is the fix: it waits for binary_sensor.<name>_busy to go off\nbefore sending, retries a few times, and gives up rather than looping\nforever.\n\nSend anything into the 'glance notice' link-in node with msg.payload set to\nthe notice data, from any other flow:\n\n    msg.payload = { text: 'PARCEL [icon:128]', color: 'dark_orange',\n                    sound: 'hello', animation: 'pulse' };\n\nChange the entity id in the 'is the clock busy' node to match your clock."
     },
     {
         "id": "gq_link_in",
@@ -34,7 +34,7 @@
         "crontab": "",
         "once": false,
         "topic": "",
-        "payload": "{\"text\":\"HEJ [icon:134]\",\"color\":\"lawn_green\",\"sound\":\"hello\",\"animation\":\"pulse\"}",
+        "payload": "{\"text\":\"HELLO [icon:134]\",\"color\":\"lawn_green\",\"sound\":\"hello\",\"animation\":\"pulse\"}",
         "payloadType": "json",
         "x": 140,
         "y": 100,

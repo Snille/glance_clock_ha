@@ -87,7 +87,7 @@
         "type": "function",
         "z": "glance_espresso_tab",
         "name": "build the notice",
-        "func": "// A notice is immediate. A scene would wait for the clock's own cycle,\n// which can be fifteen seconds -- too long for something you are\n// standing there waiting for.\nif (msg.payload === 'ready') {\n    msg.action = 'glance_clock.send_notice';\n    msg.payload = {\n        text: 'ESPRESSO [icon:130]',\n        animation: 'pulse',\n        color: 'lime_green',\n        sound: 'bells',\n    };\n} else {\n    msg.action = 'glance_clock.send_notice';\n    msg.payload = {\n        text: 'KALL',\n        animation: 'none',\n        color: 'royal_blue',\n    };\n}\nreturn msg;\n",
+        "func": "// A notice is immediate. A scene would wait for the clock's own cycle,\n// which can be fifteen seconds -- too long for something you are\n// standing there waiting for.\nif (msg.payload === 'ready') {\n    msg.action = 'glance_clock.send_notice';\n    msg.payload = {\n        text: 'ESPRESSO [icon:130]',\n        animation: 'pulse',\n        color: 'lime_green',\n        sound: 'bells',\n    };\n} else {\n    msg.action = 'glance_clock.send_notice';\n    msg.payload = {\n        text: 'COLD',\n        animation: 'none',\n        color: 'royal_blue',\n    };\n}\nreturn msg;\n",
         "outputs": 1,
         "timeout": 0,
         "noerr": 0,

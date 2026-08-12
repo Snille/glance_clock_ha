@@ -17,7 +17,7 @@ conditions:
 actions:
   - action: glance_clock.send_notice
     data:
-      text: "TVATTEN KLAR"
+      text: "WASHING DONE"
       animation: wave
       color: sky_blue
       sound: complete

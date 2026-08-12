@@ -2,8 +2,11 @@
 #
 # max_exceeded: silent keeps the log clean when someone leans on the button.
 #
-# Note the transliterated text: the clock's font has no Ö, so writing DÖRREN
-# would give you a visible box instead. See SCENES.md on the font.
+# The examples are in English, but the font is worth knowing about if yours
+# will not be: the matrix is ASCII only. Accented letters are transliterated --
+# å and ä become a, ö becomes o -- and anything with no glyph at all is drawn as
+# a visible box rather than dropped, so a mangled string looks wrong instead of
+# looking fine. See SCENES.md on the font.
 
 alias: Doorbell on the clock
 description: Announce the doorbell immediately, as a notice rather than a scene
@@ -14,7 +17,7 @@ triggers:
 actions:
   - action: glance_clock.send_notice
     data:
-      text: "DORREN [icon:128]"
+      text: "FRONT DOOR [icon:128]"
       animation: pulse
       color: dark_orange
       sound: bells

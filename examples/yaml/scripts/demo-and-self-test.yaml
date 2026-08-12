@@ -258,8 +258,8 @@ sequence:
   - action: notify.send_message
     target: { entity_id: "{{ clock }}" }
     data:
-      title: "Posten"
-      message: "PAKET HAR KOMMIT [sound:bells] [anim:pulse] [color:dark_orange]"
+      title: "Delivery"
+      message: "PARCEL HAS ARRIVED [sound:bells] [anim:pulse] [color:dark_orange]"
   - delay: { seconds: 13 }
 
   # ============ 9. A timer the clock runs itself =========================
@@ -268,9 +268,9 @@ sequence:
       t9: "{{ now().strftime('%H:%M:%S') }}"
   - action: glance_clock.send_timer
     data:
-      final_text: "KLAR [icon:130]"
+      final_text: "DONE [icon:130]"
       intervals:
-        - text: "TE"
+        - text: "TEA"
           duration: 8
   - delay: { seconds: 12 }
 
@@ -282,7 +282,7 @@ sequence:
   - action: glance_clock.send_notice
     continue_on_error: true
     data:
-      text: "SKA MISSLYCKAS"
+      text: "SHOULD FAIL"
       color: chartreuse
   - delay: { seconds: 3 }
 
@@ -303,7 +303,7 @@ sequence:
           sound: complete
         - at: 0
           type: text
-          text: "ALLT KLART [icon:134]"
+          text: "ALL DONE [icon:134]"
           scroll: repeat
           seconds: 10
   - delay: { seconds: 8 }

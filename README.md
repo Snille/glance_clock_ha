@@ -239,8 +239,8 @@ action: notify.send_message
 target:
   entity_id: notify.glance_clock      # your clock's own name
 data:
-  title: "Posten"
-  message: "PAKET HAR KOMMIT [sound:bells] [anim:pulse] [color:dark_orange]"
+  title: "Delivery"
+  message: "PARCEL HAS ARRIVED [sound:bells] [anim:pulse] [color:dark_orange]"
 ```
 
 `notify.send_message` carries a message and a title and nothing else, which is
@@ -354,7 +354,7 @@ can hold:
   intensity: 8
   seconds: 15
 - type: text            # stays on screen, unlike a notice
-  text: "Ute: -3[icon:176]C"
+  text: "Outside: -3[icon:176]C"
 - type: sound           # a cue at a point on the timeline
   sound: bells
 ```

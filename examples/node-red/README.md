@@ -132,7 +132,7 @@ Send into it from any other flow with a link-out node:
 
 ```javascript
 msg.payload = {
-    text: 'POSTEN [icon:128]',
+    text: 'PARCEL [icon:128]',
     color: 'dark_orange',
     sound: 'hello',
 };

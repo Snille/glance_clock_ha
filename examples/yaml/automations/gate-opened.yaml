@@ -23,7 +23,7 @@ actions:
     continue_on_timeout: true
   - action: glance_clock.send_notice
     data:
-      text: "GRINDEN OPPEN"
+      text: "GATE OPEN"
       animation: none
       color: lawn_green
       sound: hello

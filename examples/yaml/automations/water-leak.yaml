@@ -40,7 +40,7 @@ actions:
       sequence:
         - action: glance_clock.send_notice
           data:
-            text: "VATTENLACKA [icon:144]"
+            text: "WATER LEAK [icon:144]"
             animation: pulse
             color: red
             sound: radar

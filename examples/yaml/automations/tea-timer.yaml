@@ -21,10 +21,10 @@ triggers:
 actions:
   - action: glance_clock.send_timer
     data:
-      final_text: "TE KLART [icon:130]"
+      final_text: "TEA READY [icon:130]"
       intervals:
-        - text: "SKOLJ"
+        - text: "RINSE"
           duration: 30
-        - text: "DRAR"
+        - text: "STEEPING"
           duration: 180
 mode: single
