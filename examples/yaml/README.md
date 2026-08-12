@@ -82,9 +82,13 @@ data:
 ```
 
 The same window is on the device page as the **DND Start** and **DND End**
-number entities. The schedule is the only way to make the clock quiet: the
-firmware also has a permanent DND flag, but nothing exposes it — no switch, no
-service parameter — so it is preserved on write and otherwise unreachable.
+number entities.
+
+For "quiet until I say otherwise" rather than "quiet between these hours", there
+is a **Do Not Disturb Hold** switch. It sets the firmware's own permanent flag,
+so the clock keeps applying it while Home Assistant is elsewhere. This page used
+to say that flag was unreachable; it was only unexposed — settings writes had
+been carefully preserving it the whole time.
 
 Whether the window is in force *right now* is a separate question, and the clock
 answers it: `binary_sensor.<name>_do_not_disturb`, pushed the moment it changes,

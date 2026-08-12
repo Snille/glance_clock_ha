@@ -30,6 +30,7 @@ async def async_setup_entry(
         GlanceClockTimeModeSwitch(config_entry, mac_address, name, connection_manager),
         GlanceClockTimeFormatSwitch(config_entry, mac_address, name, connection_manager),
         GlanceClockMuteSwitch(config_entry, mac_address, name, connection_manager),
+        GlanceClockPermanentDNDSwitch(config_entry, mac_address, name, connection_manager),
     ]
 
     async_add_entities(entities)
@@ -582,3 +583,32 @@ class GlanceClockMuteSwitch(GlanceClockSettingSwitch):
         self._attr_name = f"{device_name} Mute"
         self._attr_unique_id = f"{mac_address}_permanent_mute"
         self._attr_icon = "mdi:volume-off"
+
+
+class GlanceClockPermanentDNDSwitch(GlanceClockSettingSwitch):
+    """Do Not Disturb held on, regardless of the schedule.
+
+    The schedule answers "be quiet between these hours". This answers "be quiet
+    until I say otherwise", and the clock keeps applying it while Home Assistant
+    is elsewhere.
+
+    The field was being read and written all along -- settings writes preserve
+    it, which is what stopped a brightness change from silently unmuting the
+    house. It simply had no control, so the documentation here said it was
+    unreachable. It was only unexposed.
+
+    Whether the window is in force right now, from either source, is the Do Not
+    Disturb binary sensor rather than this.
+    """
+
+    _setting_key = "permanentDND"
+
+    def __init__(self, config_entry, mac_address, device_name, connection_manager):
+        """Initialize the permanent DND switch."""
+        super().__init__(config_entry, mac_address, device_name, connection_manager)
+        # Not plain "Do Not Disturb": the binary sensor already has that name,
+        # and it answers a different question. This one holds it on; that one
+        # says whether it is on, from either source.
+        self._attr_name = f"{device_name} Do Not Disturb Hold"
+        self._attr_unique_id = f"{mac_address}_permanent_dnd"
+        self._attr_icon = "mdi:bell-off-outline"
