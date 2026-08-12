@@ -4,8 +4,9 @@
 # drawn stays on screen after its step ends -- the clock does not clear between
 # frames. Nothing paints over anything here, so the ring accumulates.
 #
-# The whole timeline goes up in ONE call. Sending fills one at a time cannot
-# animate: a scene change only takes effect on the clock's own ~15 second cycle.
+# The whole timeline goes up in ONE call, and the clock runs it at its own frame
+# rate. Sending fills one at a time cannot animate: every call is a Bluetooth
+# round trip, so the timing would be whatever the radio happened to do.
 
 action: glance_clock.set_scene
 data:

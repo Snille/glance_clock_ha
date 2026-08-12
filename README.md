@@ -343,9 +343,10 @@ Available: `fire`, `wheel`, `flower`, `flower2`, `fan`, `sun`, `thunderstorm`, `
 and `sweep`. They are single-colour patterns tinted by `color` -- picking black renders
 nothing. Only `sweep` has a direction; a negative `speed` runs it anticlockwise.
 
-Note that the clock's scene engine updates on a roughly 15 second cycle, so a scene or
-animation takes up to that long to appear. Notifications are immediate -- use
-`send_notice` when something *happens*, and scenes for showing *state*.
+A scene or animation appears as soon as it is sent: the integration asks the clock to
+start playback straight after the write, which brings it up at once. What still separates
+the two is not speed but shape -- a notice interrupts and hands the display back, a scene
+joins what is there and stays until its slot is cleared.
 
 ### Clear LEDs
 
@@ -532,9 +533,9 @@ first time:
 **A scene stays in its slot.** It does not disappear when its lifetime ends; it
 stays and replays until the slot is cleared with `clear_leds`.
 
-**Notices are immediate, scenes are not.** A scene joins the display on the
-clock's own cycle, up to about fifteen seconds later. Anything you are standing
-there waiting for should be a notice.
+**A notice interrupts, a scene joins.** Both arrive at once. The difference is
+what happens next: a notice takes the display and gives it back, a scene sits
+alongside the time until something clears it.
 
 **Sound needs the clock unmuted.** A muted clock plays nothing and reports no
 error, which looks exactly like a bad sound name. There is a Mute switch on the

@@ -357,8 +357,35 @@ class GlanceClockNotificationService(BaseNotificationService):
         It acknowledges the write, nothing appears, and nothing is logged --
         which reads as a broken integration rather than a busy slot. Clearing
         first costs one command and makes a send mean what it says.
+
+        No refresh here: the write that follows asks for one, and redrawing an
+        emptied slot on the way past would only show the gap.
         """
-        await self.async_delete_scene(slot)
+        await self.async_delete_scene(slot, refresh=False)
+
+    async def _refresh_scene_playback(self) -> None:
+        """Make a scene that has just been written take effect now.
+
+        Without this the clock picks the new scene up on its own cycle, up to
+        about fifteen seconds later. That delay was taken for firmware and
+        written into the documentation as a law -- scenes are for state,
+        notices are for events -- when it is really just the scene engine
+        waiting for its next pass.
+
+        Command 31 starts scene playback, and on hardware 2026-08-12 it brought
+        the new scene up immediately with nothing visible to give it away.
+        Command 35 does it too but draws the "fetching from the cloud"
+        indicator, which is a strange thing to show for a cloud that shut down
+        years ago, and 30 followed by 31 blinks the digital clockface -- which
+        a progress ring updating every minute would do every minute.
+
+        Best effort: the scene is already written and will appear on the cycle
+        regardless, so a refusal here costs latency, not the update.
+        """
+        try:
+            await self._connection_manager.send_command(bytes([31, 0, 0, 0]))
+        except Exception as err:  # noqa: BLE001 -- bleak raises broadly
+            _LOGGER.debug("Could not refresh scene playback: %s", err)
 
     async def async_send_custom_scene(
         self,
@@ -402,6 +429,7 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.debug("Custom scene command: %s", command.hex())
 
             if await self._connection_manager.send_command(command):
+                await self._refresh_scene_playback()
                 _LOGGER.info("Custom scene sent successfully")
                 return True
 
@@ -500,6 +528,7 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.debug("Scene command: %s", command.hex())
 
             if await self._connection_manager.send_command(command):
+                await self._refresh_scene_playback()
                 _LOGGER.info("Scene sent successfully")
                 return True
 
@@ -567,6 +596,7 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.debug("Animation command: %s", command.hex())
 
             if await self._connection_manager.send_command(command):
+                await self._refresh_scene_playback()
                 _LOGGER.info("Animation sent successfully")
                 return True
 
@@ -576,14 +606,20 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.error(f"Error sending animation: {e}")
             return False
 
-    async def async_delete_scene(self, slot: int = 0) -> bool:
-        """Remove the scene stored in one slot."""
+    async def async_delete_scene(self, slot: int = 0, refresh: bool = True) -> bool:
+        """Remove the scene stored in one slot.
+
+        `refresh` exists for the caller clearing several slots in a row, which
+        only needs the display brought up to date once at the end.
+        """
         if not self._connection_manager or not self._connection_manager.is_connected:
             _LOGGER.warning("Device not connected, cannot delete scene")
             return False
 
         try:
             if await self._connection_manager.send_command(bytes([33, 0, 0, slot])):
+                if refresh:
+                    await self._refresh_scene_playback()
                 _LOGGER.info("Scene slot %d cleared", slot)
                 return True
             _LOGGER.error("Failed to clear scene slot %d", slot)

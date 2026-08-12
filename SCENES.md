@@ -13,7 +13,7 @@ on the display rather than announce itself and go away.
 - [Step types](#step-types)
 - [Scene slots](#scene-slots)
 - [Display modes](#display-modes)
-- [Timing, and why the clock waits](#timing-and-why-the-clock-waits)
+- [Timing](#timing)
 - [Worked examples](#worked-examples)
 - [Things that will look like bugs](#things-that-will-look-like-bugs)
 
@@ -103,9 +103,8 @@ you erase it. A firmware animation tinted black renders nothing at all, which is
 the one case where "off" is a surprise rather than a convenience.
 
 A colour name that does not exist raises a `ServiceValidationError` naming the
-whole palette — with one exception. `send_notice` falls back to white on an
-unknown colour instead of failing, so a typo there shows up as an unexpectedly
-white notice rather than an error.
+whole palette. That goes for notices too since 1.22.0 — before that a typo there
+came out white, which was indistinguishable from the clock ignoring the call.
 
 ## Three ways to draw
 
@@ -389,23 +388,31 @@ Every drawing service takes `mode`:
 `watchface` for anything ambient you want visible next to the time.
 `exclusive` when you need the matrix — that is, for text.
 
-## Timing, and why the clock waits
+## Timing
 
-**The scene engine updates on a roughly 15-second cycle.** A scene you send
-appears when that cycle comes round, up to fifteen seconds later. This is the
-single most important thing to design around, and it drives one rule:
+**A scene appears as soon as it is sent.** The integration asks the clock to
+start scene playback immediately after every write, which brings the new scene
+up at once — no blink, no flicker, nothing to give it away.
 
-> Notices are for things that *happen*. Scenes are for showing *state*.
+That was not always true, and older notes here and elsewhere say otherwise.
+Until 1.24.0 a scene waited for the scene engine's own pass, up to fifteen
+seconds, and that delay was taken for firmware and written down as a law:
+*notices are for events, scenes are for state.* It was not firmware. The
+engine was simply waiting for its next pass, and a single command tells it not
+to.
 
-A timer finishing, a door opening, the coffee being ready — those are notices,
-and a notice interrupts and shows at once. Battery level, a progress ring, the
-weather, how much of the workday is left — those are scenes, and nobody minds
-that they arrived twelve seconds ago.
+The distinction that survives is smaller and real: **a notice interrupts, a
+scene does not.** A notice takes over the display and then gives it back. A
+scene joins what is already there, in its slot, and stays. So the question is
+no longer *how soon* but *how long* — announce with a notice, show with a
+scene.
 
-The same cycle is why a short scene visibly waits before repeating: a timeline
-shorter than about 750 frames finishes, then sits there until the cycle brings
-it round again. If you want continuous motion, either build a timeline of
-roughly 15 seconds or accept the pause as part of the rhythm.
+**A short timeline still finishes and waits.** This part is the engine's own
+rhythm and no command changes it: a timeline shorter than about 750 frames
+plays, stops, and sits there until the cycle brings it round again — measured
+on hardware as roughly twelve seconds of stillness after a 2.4 second comet.
+For continuous motion, build a timeline of roughly 15 seconds, or accept the
+pause as part of it.
 
 Filmed on hardware 2026-08-12, which puts numbers on all of that. A 2.4 second
 comet ran its twelve steps at exactly four pixels per 0.2 s, then stood still
@@ -465,8 +472,9 @@ the same timeline in a six-line loop.
 
 Collected here so they cost you a minute rather than an evening.
 
-**Nothing happened for fifteen seconds.** The scene engine's own cycle. Expected.
-Use a notice if it needs to be immediate.
+**Nothing happened for fifteen seconds.** That was normal before 1.24.0 and is
+now a sign the refresh did not reach the clock -- the scene still arrives on the
+engine's own pass. Check the connection rather than the scene.
 
 **The scene will not go away.** Scenes persist in their slot. `clear_leds` with
 the right slot number. Ending a lifetime does not remove it.

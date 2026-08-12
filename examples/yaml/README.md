@@ -26,12 +26,14 @@ here to be run once and looked at, and then stolen from.
 | The situation | The service |
 | :-- | :-- |
 | **Something happened** | `send_notice` — immediate, interrupts, then gone |
-| **Something is true right now** | `set_leds` / `set_scene` — arrives within ~15 s, stays until cleared |
+| **Something is true right now** | `set_leds` / `set_scene` — arrives at once, stays until cleared |
 | **Something is counting down** | `send_timer` — the clock runs it itself |
 | **The weather** | `send_forecast` (temperature graph, slot 1) or a `weather` scene step (particles) |
 
-Getting this wrong is the most common disappointment with the clock. A scene
-sent when the doorbell rings shows up long after whoever it was has left.
+Both arrive at once, so this is about shape rather than speed: a notice takes
+the display and hands it back, a scene sits alongside the time until its slot is
+cleared. A doorbell that stays on the rings until somebody clears it is the
+wrong tool, however promptly it got there.
 
 ## automations/
 
@@ -124,8 +126,9 @@ data:
 
 ## Two things that will look like bugs
 
-**Nothing happened for fifteen seconds.** The scene engine runs on its own
-cycle. Notices are immediate; scenes are not.
+**A short scene runs, then stands still.** It finishes its timeline and waits
+for the engine's next pass — about twelve seconds — before repeating. Build a
+timeline of roughly 15 seconds if you want continuous motion.
 
 **The scene will not go away.** Scenes persist in their slot and replay until
 cleared. Ending a lifetime does not remove one.

@@ -337,10 +337,14 @@ class GlanceClockClearAllScenesButton(GlanceClockButtonBase):
 
         # Every slot, one at a time, carrying on past a failure: a slot that
         # refuses is no reason to leave the other seven filled, and clearing an
-        # empty slot is harmless.
+        # empty slot is harmless. Only the last one asks the clock to redraw --
+        # eight refreshes would be seven commands spent on intermediate states
+        # nobody sees.
         for slot in range(SCENE_SLOTS):
             try:
-                await notify_service.async_delete_scene(slot)
+                await notify_service.async_delete_scene(
+                    slot, refresh=slot == SCENE_SLOTS - 1
+                )
             except Exception as err:  # noqa: BLE001 -- bleak raises broadly
                 _LOGGER.warning("Could not clear scene slot %d: %s", slot, err)
 

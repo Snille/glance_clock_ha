@@ -7,6 +7,44 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.24.0] - 2026-08-12
+### Changed
+- **Scenes appear immediately.** Every scene, animation and slot clear now asks the clock
+  to start playback straight after the write, and the new content comes up at once.
+
+  The fifteen second wait was never firmware. The scene engine was waiting for its own
+  next pass, and command 31 tells it not to. Found because Erik noticed that sending an
+  animation to an occupied slot had started taking fifteen seconds where it used to
+  switch straight away -- which turned out to be the slot-clearing added in 1.14.0, and
+  led to testing whether the delay could be driven at all.
+
+  Three commands do it, and the choice matters because this now runs on every send:
+
+  - **31**, start scene playback: immediate, and nothing visible gives it away. Chosen.
+  - **35**, update and refresh: works, but draws the "fetching from the cloud" indicator,
+    which is a strange thing to show for a cloud that shut down years ago.
+  - **30 then 31**: works, but blinks the digital clockface -- which a progress ring
+    updating every minute would do every minute.
+
+  The clearing before a write does not refresh; the write that follows asks for one, and
+  redrawing an emptied slot on the way past would only show the gap. Clear All Scenes
+  refreshes once at the end rather than eight times.
+
+- **The documentation this overturns has been rewritten.** "Notices are for events, scenes
+  are for state" appeared in six places and rested entirely on scenes arriving late. The
+  distinction that survives is smaller and real: a notice interrupts and hands the display
+  back, a scene joins what is there and stays until its slot is cleared. Announce with a
+  notice, show with a scene.
+
+  What has *not* changed is the engine's own rhythm: a timeline shorter than about 750
+  frames still plays, stops, and waits for the next pass before repeating -- measured as
+  roughly twelve seconds of stillness after a 2.4 second comet. Filling the cycle is still
+  how you get continuous motion.
+
+### Fixed
+- SCENES.md still said `send_notice` falls back to white on an unknown colour. It stopped
+  doing that in 1.22.0.
+
 ## [1.23.0] - 2026-08-12
 ### Added
 - **A Do Not Disturb binary sensor.** The quiet window was write-only: the schedule could

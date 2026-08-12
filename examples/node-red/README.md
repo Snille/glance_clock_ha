@@ -31,10 +31,10 @@ it stays and replays until something clears the slot. Use `clear_leds` with the
 same slot when you want it gone. This is the single most surprising thing about
 the clock, and it will look like a bug the first time it happens.
 
-**Notices are immediate, scenes are not.** A notice interrupts and shows at
-once. A scene joins the display on the clock's own cycle, which can take up to
-about fifteen seconds. If the thing you are announcing matters right now — a
-timer finishing, a door opening — send a notice.
+**A notice interrupts, a scene joins.** Both appear at once. The difference is
+what happens afterwards: a notice takes the display and hands it back, a scene
+sits alongside the time until its slot is cleared. Announce with a notice, show
+with a scene.
 
 ## Weather on the rings
 
