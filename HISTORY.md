@@ -7,6 +7,13 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.28.1] - 2026-08-12
+### Changed
+- The demo script runs in under two minutes instead of three. Every wait was sized for the
+  scene engine's cycle, which since 1.24.0 no longer needs waiting for -- a scene appears
+  the moment it is sent, so a phase only has to outlast the eye. The comet drops to three
+  laps for the same reason. Nobody watches a three minute demo.
+
 ## [1.28.0] - 2026-08-12
 ### Added
 - **A demo-and-self-test script**, in `examples/yaml/scripts/`. Three minutes that exercise
