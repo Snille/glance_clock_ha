@@ -168,7 +168,24 @@ class GlanceClockNotificationService(BaseNotificationService):
                 f"Has client: {hasattr(self._connection_manager, 'client')}")
 
     async def async_send_message(self, message="", **kwargs):
-        """Send a notification message to the Glance Clock."""
+        """Send a notification message to the Glance Clock.
+
+        UNREACHABLE as things stand, and worth knowing before spending time on
+        it. This class is a legacy BaseNotificationService, but nothing ever
+        registers it as one: the platform's async_setup_entry builds the object,
+        stores it in hass.data for the other services to use, and adds no
+        entities. So `notify.glance_clock` does not exist and this method has no
+        caller. Confirmed against a running Home Assistant 2026-08-12 -- the
+        notify domain lists every mobile app and no clock.
+
+        The class is really the integration's command layer wearing a notify
+        platform as a setup hook, which is also why Platform.NOTIFY cannot
+        simply be dropped: every other service reaches the clock through this
+        object.
+
+        Kept rather than deleted because it is correct code that a real notify
+        entity could use. Use glance_clock.send_notice instead.
+        """
         if not message:
             _LOGGER.warning("Cannot send empty notification message")
             return

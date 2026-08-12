@@ -183,7 +183,8 @@ Once configured, the integration provides:
     attribute. Setting the DND schedule says when the clock *should* be quiet; this says
     whether it is quiet *now*, which is what an automation needs before deciding a notice
     is worth sending
-- **Notify** - Send notifications via `notify.glance_clock`
+- **Notify** - `glance_clock.send_notice`. There is no `notify.glance_clock` entity;
+  see the note under Send Notification
 
 
 ## Using Icons in Notifications
@@ -198,24 +199,28 @@ See the full list of available icon codes and their meanings in [ICONS.md](./ICO
 
 Send a custom notification to your Glance Clock.
 
-**Service:** `notify.glance_clock`
+**Service:** `glance_clock.send_notice`
+
+> Earlier versions of this README documented a `notify.glance_clock` service.
+> **It has never existed.** The integration lists `Platform.NOTIFY` and builds a
+> notification service object, but that object is its internal command layer --
+> everything else here talks to the clock through it -- and no notify entity is
+> ever registered. Anything calling `notify.glance_clock` fails, and Home
+> Assistant's own repairs will say so if you have Spook installed.
 
 ```yaml
-service: notify.glance_clock
+action: glance_clock.send_notice
 data:
-  message: "Meeting in 5 minutes!"
-  data:
-    title: "Calendar Reminder"
-    animation: "pulse"
-    sound: "bells"
-    color: "blue"
-    priority: "high"
+  text: "Meeting in 5 minutes!"
+  animation: "pulse"
+  sound: "bells"
+  color: "blue"
+  priority: "high"
 ```
 
 **Parameters:**
 
-- `message` (required): Notification text
-- `title`: Notification title
+- `text` (required): Notification text
 - `animation`: One of 23 — `none`, `pulse`, `wave`, `fire`, `wheel`, `flower`, `flower2`,
   `fan`, `sun`, `thunderstorm`, `cloud`, and twelve `weather_*` icons
 - `sound`: One of 18 — see the Sound select on the device page to audition them

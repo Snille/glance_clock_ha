@@ -7,6 +7,22 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.26.1] - 2026-08-12
+### Fixed
+- **The README documented a `notify.glance_clock` service that has never existed.** Home
+  Assistant's repairs flagged it when a test script called it: the notify domain lists
+  every mobile app on the network and no clock.
+
+  The integration lists `Platform.NOTIFY` and its setup builds a notification service
+  object, but that object is the integration's *command layer* -- every other service
+  reaches the clock through it -- and no notify entity is ever registered. The platform is
+  being used as a setup hook, which is also why it cannot simply be dropped.
+
+  The README now documents `glance_clock.send_notice`, which is what actually works, and
+  says plainly that the notify service was never real. `async_send_message` is marked
+  unreachable in the source, so the next person to look at it does not repair it a second
+  time -- 1.22.0 fixed a genuine bug in it, on a path with no caller.
+
 ## [1.26.0] - 2026-08-12
 ### Added
 - **An Animation Slot control on the device page.** The animation buttons were fixed to
