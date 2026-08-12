@@ -128,3 +128,44 @@ DND_FIELD_NAMES = {
     "dndFromHour": "fromHour",
     "dndTillHour": "tillHour",
 }
+
+
+# The clock's built-in clock faces, as the official Android application numbers
+# them for firmware 1.6.6 and later. Taken from mrmstn/glance_clock_ha (MIT).
+#
+# These are written to the scene_data characteristic, which is the same one the
+# Busy binary sensor reads -- so that byte is not a read-only status, it is the
+# register saying which face is on screen. Bit 7 is set while the face is not
+# being displayed, which is why the sensor reads it as "idle".
+#
+# Whether the low bits are a face number here and a digital-time flag in the
+# sensor is not settled; both readings fit everything watched so far. See
+# SCENES.md.
+FACTORY_SCENES = {
+    "off": 0,
+    "calendar": 1,
+    "notification": 2,
+    "call": 3,
+    "weather": 4,
+    "rain_forecast": 5,
+    "smile": 6,
+    "temperature_forecast": 7,
+    "alarm": 8,
+    "timer": 9,
+    "interval_timer": 10,
+    "repeat_all": 255,
+}
+
+#: Bit 7 of the scene_data byte: the named face is not currently displayed.
+FACTORY_SCENE_INACTIVE = 0x80
+
+
+def decode_factory_scene(value: int) -> str | None:
+    """Name the face a scene_data byte refers to, ignoring the inactive flag."""
+    if value == FACTORY_SCENES["repeat_all"]:
+        return "repeat_all"
+    wanted = value & ~FACTORY_SCENE_INACTIVE
+    for name, number in FACTORY_SCENES.items():
+        if number == wanted:
+            return name
+    return None

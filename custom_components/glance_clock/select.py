@@ -4,13 +4,22 @@ import asyncio
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.exceptions import ServiceValidationError
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from homeassistant.helpers.restore_state import RestoreEntity
 
 from .animation_state import get_animation_state
-from .const import COLORS, DOMAIN, SOUNDS
+from .const import (
+    COLORS,
+    DOMAIN,
+    FACTORY_SCENES,
+    SCENE_DATA_CHARACTERISTIC_UUID,
+    SOUNDS,
+    decode_factory_scene,
+)
 from .entity import GlanceClockEntity
 from .utils.led_utils import RUNNABLE
 
@@ -44,6 +53,7 @@ async def async_setup_entry(
         GlanceClockAnimationSelect(config_entry, mac_address, name, connection_manager),
         GlanceClockAnimationColorSelect(config_entry, mac_address, name, connection_manager),
         GlanceClockSoundSelect(config_entry, mac_address, name, connection_manager),
+        GlanceClockFactorySceneSelect(config_entry, mac_address, name, connection_manager),
     ]
 
     async_add_entities(entities)
@@ -242,3 +252,95 @@ class GlanceClockSoundSelect(GlanceClockAnimationChoice):
         self._attr_name = f"{device_name} Sound"
         self._attr_unique_id = f"{mac_address}_sound"
         self._attr_icon = "mdi:music-note"
+
+
+class GlanceClockFactorySceneSelect(GlanceClockEntity, SelectEntity):
+    """Show one of the clock's own built-in faces.
+
+    These are the faces the clock shipped with -- calendar, weather, smile and
+    the rest -- selected by writing one byte to scene_data. That is the same
+    characteristic the Busy binary sensor reads, which is how we learned it is a
+    register rather than a status byte.
+
+    Nothing here draws anything: the faces belong to the firmware, and a face
+    that has no data behind it shows as little as an empty slot does. `off`
+    returns the clock to the plain time.
+    """
+
+    _attr_entity_category = EntityCategory.CONFIG
+    _attr_icon = "mdi:movie-open-play-outline"
+
+    def __init__(self, config_entry, mac_address, device_name, connection_manager):
+        """Initialize the factory scene select."""
+        super().__init__(config_entry, mac_address, device_name, connection_manager)
+        self._attr_name = f"{device_name} Factory Scene"
+        self._attr_unique_id = f"{mac_address}_factory_scene"
+        self._attr_options = list(FACTORY_SCENES)
+        self._attr_current_option = None
+
+    @property
+    def available(self) -> bool:
+        """Available only while the clock can be written to."""
+        return bool(
+            self._connection_manager and self._connection_manager.is_connected
+        )
+
+    async def async_added_to_hass(self) -> None:
+        """Follow the clock's own pushes, and read once to start."""
+        await super().async_added_to_hass()
+
+        @callback
+        def _handle(event):
+            if event.data.get("address") != self._mac_address:
+                return
+            if event.data.get("characteristic") != "scene_data":
+                return
+            payload = event.data.get("bytes") or []
+            if not payload:
+                return
+            name = decode_factory_scene(payload[0])
+            if name is not None:
+                self._attr_current_option = name
+                self.async_write_ha_state()
+
+        self.async_on_remove(
+            self.hass.bus.async_listen("glance_clock_notification", _handle)
+        )
+        await self._read_now()
+
+    async def _read_now(self) -> None:
+        """Read which face the clock says it is on, if it is reachable."""
+        if not self._connection_manager or not self._connection_manager.is_connected:
+            return
+        try:
+            data = await self._connection_manager.read_characteristic(
+                SCENE_DATA_CHARACTERISTIC_UUID
+            )
+        except Exception as err:  # noqa: BLE001 -- bleak raises broadly
+            _LOGGER.debug("Could not read the current factory scene: %s", err)
+            return
+        if data:
+            name = decode_factory_scene(bytes(data)[0])
+            if name is not None:
+                self._attr_current_option = name
+                self.async_write_ha_state()
+
+    async def async_select_option(self, option: str) -> None:
+        """Write one face number to scene_data."""
+        if option not in FACTORY_SCENES:
+            raise ServiceValidationError(
+                f"unknown factory scene '{option}'; expected one of "
+                f"{', '.join(sorted(FACTORY_SCENES))}"
+            )
+
+        if not self._connection_manager or not self._connection_manager.is_connected:
+            raise ServiceValidationError("the clock is not connected")
+
+        written = await self._connection_manager.write_characteristic(
+            SCENE_DATA_CHARACTERISTIC_UUID, bytes([FACTORY_SCENES[option]])
+        )
+        if not written:
+            raise ServiceValidationError(f"the clock did not take '{option}'")
+
+        self._attr_current_option = option
+        self.async_write_ha_state()

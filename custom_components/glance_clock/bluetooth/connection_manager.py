@@ -331,6 +331,54 @@ class GlanceClockConnectionManager:
             await self._disconnect()
             return False
 
+    async def write_characteristic(
+        self, characteristic_uuid: str, data: bytes
+    ) -> bool:
+        """Write raw bytes to a characteristic other than the command one.
+
+        send_command always writes to the control characteristic, which is right
+        for command frames and wrong for everything else. Selecting a built-in
+        clock face, for one, is a byte written to scene_data -- the same
+        characteristic the Busy sensor reads.
+
+        Args:
+            characteristic_uuid: The characteristic to write to
+            data: Raw bytes to write
+
+        Returns:
+            True if the write succeeded, False otherwise
+        """
+        if not self.client or not self.client.is_connected:
+            _LOGGER.debug(
+                f"No active connection to {self.name}, attempting to connect")
+            await self._connect()
+
+            if not self.client or not self.client.is_connected:
+                _LOGGER.error(
+                    f"Failed to establish connection for write to {self.name}")
+                return False
+
+        try:
+            try:
+                await self.client.write_gatt_char(
+                    characteristic_uuid, data, response=True
+                )
+            except Exception as e:
+                _LOGGER.debug(
+                    f"Write with response failed ({e}), trying without response")
+                await self.client.write_gatt_char(
+                    characteristic_uuid, data, response=False
+                )
+            _LOGGER.debug(
+                f"Wrote {data.hex()} to {characteristic_uuid}")
+            return True
+
+        except Exception as e:
+            _LOGGER.error(
+                f"Failed to write {characteristic_uuid} on {self.name}: {e}")
+            await self._disconnect()
+            return False
+
     async def _subscribe_notifications(self):
         """Listen to whatever the clock pushes on its two Glance characteristics.
 
