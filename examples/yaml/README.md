@@ -105,6 +105,11 @@ cleared, so an experiment that went wrong keeps going wrong on the wall — and
 the slot number is exactly the thing nobody writes down. There is a **Clear All
 Scenes** button on the device page that does the same in one click.
 
+Clearing everything writes eight deletes in a row and took about five seconds on
+hardware, with a blank dial throughout. That is fine as a way out of a mess, and
+poor inside a sequence you are watching — when you know which slots you used,
+call `clear_leds` on those instead.
+
 ## scenes/
 
 Run them from Developer Tools, watch what happens, then take the parts you want.

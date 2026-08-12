@@ -7,10 +7,11 @@
 alias: Glance Clock - full demo and self test
 description: >-
   Walks everything the integration can do, in an order that reads as a demo.
-  Under two minutes: every wait is sized for the eye rather than for the scene
-  engine, which since 1.24.0 no longer needs waiting for. Ends with a clear
-  finale so a recording knows when to stop. Change the entity ids at the top to
-  your own clock.
+  Under two minutes. Every wait is sized for the eye rather than for the scene
+  engine, which since 1.24.0 no longer needs waiting for, and each one was then
+  measured against a film of an actual run on 2026-08-12 and cut back to what
+  the dial was still showing. Ends with a clear finale so a recording knows when
+  to stop. Change the entity ids at the top to your own clock.
 mode: single
 icon: mdi:play-box-outline
 
@@ -181,7 +182,9 @@ sequence:
           segments:
             - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
             - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
-  - delay: { seconds: 7 }
+  # Eighteen steps of 0.3 s is 5.4 s of comet. Do not wait much longer than the
+  # timeline lasts, or you are filming an empty slot.
+  - delay: { seconds: 6 }
 
   # ============ 5. An effect, which needs a fill under it ================
   - variables:
@@ -217,11 +220,13 @@ sequence:
           intensity: 8
           seconds: 14
   - delay: { seconds: 8 }
-  - action: button.press
-    target: { entity_id: "{{ clear_all }}" }
-  - delay: { seconds: 3 }
 
   # ============ 7. The slot selector =====================================
+  # No clearing between 6 and 7. The fire below goes into slot 2, which is where
+  # the snow already is, so it simply replaces it -- and that replacement is
+  # worth seeing. Pressing Clear All Scenes here instead cost six seconds of
+  # blank dial on the 2026-08-12 film: it writes eight deletes in a row over BLE
+  # and takes about five seconds to finish.
   - variables:
       t7: "{{ now().strftime('%H:%M:%S') }}"
   - action: select.select_option
@@ -254,9 +259,13 @@ sequence:
   - action: button.press
     target: { entity_id: "{{ stop }}" }
   - delay: { seconds: 8 }
-  - action: button.press
-    target: { entity_id: "{{ clear_all }}" }
-  - delay: { seconds: 3 }
+  # Two slots were used, so clear those two rather than all eight. Same result
+  # here, five seconds faster.
+  - action: glance_clock.clear_leds
+    data: { slot: 2 }
+  - action: glance_clock.clear_leds
+    data: { slot: 3 }
+  - delay: { seconds: 2 }
 
   # ============ 8. The notify entity =====================================
   - variables:
@@ -266,7 +275,8 @@ sequence:
     data:
       title: "Delivery"
       message: "PARCEL HAS ARRIVED [sound:bells] [anim:pulse] [color:dark_orange]"
-  - delay: { seconds: 13 }
+  # Timed off the film: this notice is on the dial for about seven seconds.
+  - delay: { seconds: 8 }
 
   # ============ 9. A timer the clock runs itself =========================
   # intervals is what makes it a timer; countdown is only a lead-in delay.
@@ -290,7 +300,9 @@ sequence:
     data:
       text: "SHOULD FAIL"
       color: chartreuse
-  - delay: { seconds: 3 }
+  # Nothing to see -- the clock is never reached. This pause only separates the
+  # refusal from the finale in the trace.
+  - delay: { seconds: 2 }
 
   # ============ 11. Finale: stop recording when the clock goes plain =====
   - variables:
