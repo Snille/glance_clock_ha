@@ -709,3 +709,83 @@ start_scenes:
     Start the scene engine, and redraw at once. This is what every scene write
     already sends for you, which is why a scene appears the moment it is sent.
     Sending it by hand is for recovering a clock that was left stopped.
+
+send_rain_forecast:
+  name: Send rain forecast
+  description: >-
+    Draw the next 24 hours of precipitation around the dial, using the clock's own
+    forecast face. Needs a weather entity with an hourly forecast. Goes to scene
+    slot 2, so it can stand alongside the temperature forecast in slot 1.
+  fields:
+    weather_entity:
+      name: Weather entity
+      description: A weather entity that provides an hourly forecast.
+      required: true
+      selector:
+        entity:
+          domain: weather
+    max_value:
+      name: Top of the scale
+      description: >-
+        Millimetres per hour drawn at full height. This is a scale, not a filter --
+        heavier rain is still drawn, just not taller. The default of 2 mm/h is
+        moderate rain, which keeps ordinary drizzle visible.
+      default: 2
+      selector:
+        number:
+          min: 0.1
+          max: 50
+          step: 0.1
+          unit_of_measurement: mm/h
+          mode: box
+    slot:
+      name: Scene slot
+      description: Which slot to draw in. Slot 1 belongs to the temperature forecast.
+      default: 2
+      selector:
+        number:
+          min: 0
+          max: 7
+          mode: box
+    min_color:
+      name: Dry colour
+      description: Colour for an hour with no rain, as a hex value.
+      default: "0x000010"
+      selector:
+        text:
+    max_color:
+      name: Wettest colour
+      description: Colour for an hour at the top of the scale, as a hex value.
+      default: "0x00BFFF"
+      selector:
+        text:
+
+send_daylight_forecast:
+  name: Send daylight forecast
+  description: >-
+    Draw which of the next 24 hours are daylight. Needs no weather entity -- Home
+    Assistant already knows where the sun is, so this is arithmetic rather than a
+    forecast. An hour counts as lit if its midpoint falls between sunrise and
+    sunset.
+  fields:
+    slot:
+      name: Scene slot
+      description: Which slot to draw in. Slot 1 belongs to the temperature forecast.
+      default: 2
+      selector:
+        number:
+          min: 0
+          max: 7
+          mode: box
+    min_color:
+      name: Night colour
+      description: Colour for an hour of darkness, as a hex value.
+      default: "0x000010"
+      selector:
+        text:
+    max_color:
+      name: Daylight colour
+      description: Colour for an hour of daylight, as a hex value.
+      default: "0xFFD700"
+      selector:
+        text:

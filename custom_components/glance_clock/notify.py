@@ -865,8 +865,17 @@ class GlanceClockNotificationService(BaseNotificationService):
         start_timestamp: int,
         template: bytes | None = None,
         unit: str = "C",
+        scene_slot: int = 1,
+        display_mode: int = 24,
     ) -> bool:
-        """Send weather forecast data to the Glance Clock."""
+        """Send a forecast graph to the Glance Clock.
+
+        `scene_slot` and `display_mode` exist so the same frame can carry
+        something other than temperature. The third header byte was read here
+        as "24 hours" for a long time; it is a display mode, and 8, 16 and 24
+        are the values the official application uses. What the other two look
+        like has not been watched on hardware.
+        """
         if not self._connection_manager or not self._connection_manager.is_connected:
             _LOGGER.warning("Device not connected, cannot send forecast")
             return False
@@ -934,13 +943,22 @@ class GlanceClockNotificationService(BaseNotificationService):
             _LOGGER.info(f"Serialized forecast data: {len(forecast_bytes)} bytes")
             _LOGGER.debug(f"Protobuf data: {forecast_bytes.hex()}")
 
-            # Create command with header matching web project: [7, priority, 24, 1] + forecast data
-            # Priority: 16 (SCENE_PRIORITY_BAND_MEDIUM), 24 hours, slot 1
-            command = bytearray([7, 16, 24, 1])
+            # [7, priority, display mode, slot] + forecast data.
+            # Priority 16 is SCENE_PRIORITY_BAND_MEDIUM.
+            if not 0 <= int(scene_slot) < 128:
+                raise ValueError(f"scene slot must be 0-127, got {scene_slot}")
+            if int(display_mode) not in (8, 16, 24):
+                raise ValueError(
+                    f"display mode must be 8, 16 or 24, got {display_mode}"
+                )
+            command = bytearray([7, 16, int(display_mode), int(scene_slot)])
             command.extend(forecast_bytes)
 
             _LOGGER.info(f"Full command: {len(command)} bytes total")
-            _LOGGER.info(f"Command header: [7, 16, 24, 1] (forecast scene, medium priority, 24h, slot 1)")
+            _LOGGER.info(
+                "Command header: [7, 16, %s, %s] (forecast scene, medium priority)",
+                display_mode, scene_slot,
+            )
             _LOGGER.info(f"Command hex: {command.hex()}")
             
             # Send the command

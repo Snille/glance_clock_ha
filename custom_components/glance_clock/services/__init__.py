@@ -15,6 +15,8 @@ from .leds import (handle_set_leds, handle_clear_leds, handle_set_animation,
 from .raw import handle_send_command
 from .read_raw import handle_read_characteristic
 from .commands import NAMED_COMMANDS, handle_named_command
+from .other_forecasts import (handle_send_rain_forecast,
+                              handle_send_daylight_forecast)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +69,12 @@ async def async_register_services(hass: HomeAssistant, entry: ConfigEntry):
     async def _handle_named_command(call: ServiceCall):
         await handle_named_command(hass, entry, call)
 
+    async def _handle_send_rain_forecast(call: ServiceCall):
+        await handle_send_rain_forecast(hass, entry, call)
+
+    async def _handle_send_daylight_forecast(call: ServiceCall):
+        await handle_send_daylight_forecast(hass, entry, call)
+
     # Register services
     hass.services.async_register(
         DOMAIN, "update_display_settings", _handle_update_display_settings
@@ -112,6 +120,13 @@ async def async_register_services(hass: HomeAssistant, entry: ConfigEntry):
         supports_response=SupportsResponse.ONLY,
     )
 
+    hass.services.async_register(
+        DOMAIN, "send_rain_forecast", _handle_send_rain_forecast
+    )
+    hass.services.async_register(
+        DOMAIN, "send_daylight_forecast", _handle_send_daylight_forecast
+    )
+
     # Each of these carries no arguments, so one handler reads its own name.
     for name in NAMED_COMMANDS:
         hass.services.async_register(DOMAIN, name, _handle_named_command)
@@ -137,6 +152,8 @@ async def async_unregister_services(hass: HomeAssistant):
         hass.services.async_remove(DOMAIN, "set_scene")
         hass.services.async_remove(DOMAIN, "send_command")
         hass.services.async_remove(DOMAIN, "read_characteristic")
+        hass.services.async_remove(DOMAIN, "send_rain_forecast")
+        hass.services.async_remove(DOMAIN, "send_daylight_forecast")
         for name in NAMED_COMMANDS:
             hass.services.async_remove(DOMAIN, name)
         _LOGGER.info("All Glance Clock services unregistered")
