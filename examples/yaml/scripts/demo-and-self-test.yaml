@@ -1,13 +1,18 @@
-# Demo script version 4.
+# Demo script version 5.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
-# it. Bump it whenever this file changes. Version 1 is the 2026-08-12 film,
-# version 2 ran about ninety seconds, version 3 was cut to a minute and proved
-# too rushed to watch -- the clock's own smile face never got past its scrolling
-# intro. Version 4 goes back to about ninety seconds and spends them on what is
-# actually visible: the forecast faces and the clock's own faces are in, and the
-# slot rotation is commented out because it did not read on film at all.
+# it. Bump it whenever this file changes.
+#
+# Version 1 is the 2026-08-12 film. Version 2 ran about ninety seconds. Version
+# 3 was cut to a minute and proved too rushed to watch -- the clock's own smile
+# face never got past its scrolling intro. Version 4 went back to ninety
+# seconds, and filming it showed two more things worth fixing, both of them in
+# version 5: the comet opened on top of the fire animation still lit underneath
+# it, and the snow sat directly beside the rain forecast, which on a dry day
+# looks like scattered lit pixels and read as the same effect twice.
+#
+# The slot rotation stays commented out. It does not read on film at all.
 #
 # Unlike its neighbours in this directory, this file is in the form the UI
 # script editor wants -- it starts at `alias:` with no key above it. Paste the
@@ -27,7 +32,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "4"
+  demo_version: "5"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -123,6 +128,14 @@ sequence:
       slot: 2
       mode: watchface
       steps:
+        # Wipe the ring first. Filmed 2026-08-14: without this the comet's
+        # opening frame lands on top of whatever the previous section left lit
+        # -- the fire animation, here -- because a step only paints the pixels
+        # it names and a comet frame names 24 of the 48. The head then appears
+        # to fight its way out of somebody else's scene.
+        - seconds: 0.1
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 4, color: black }
         - seconds: 0.3
           segments:
             - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
@@ -218,13 +231,33 @@ sequence:
           segments:
             - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
             - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
-  # Nineteen steps of 0.3 s is 5.7 s of comet. Do not wait much longer than the
+  # A wipe plus nineteen steps of 0.3 s is 5.8 s of comet. Do not wait much longer than the
   # timeline lasts, or you are filming an empty slot.
   - delay: { seconds: 6 }
 
-  # ============ 5. An effect, which needs a fill under it ================
+  # ============ 5. Weather particles, drawn by the clock =================
+  # Ahead of the pulse rather than after it, which is where it sat in version 4.
+  # On a dry day the rain forecast two sections down is mostly unlit ring with a
+  # few bright hours, and scattered lit pixels are exactly what falling snow
+  # looks like. Back to back the two read as one effect shown twice. The pulse
+  # between them fills the ring solid and breaks the resemblance.
   - variables:
       t5: "{{ now().strftime('%H:%M:%S') }}"
+  - action: glance_clock.set_scene
+    data:
+      slot: 2
+      mode: watchface
+      steps:
+        - type: weather
+          condition: snow
+          position: full
+          intensity: 8
+          seconds: 14
+  - delay: { seconds: 7 }
+
+  # ============ 6. An effect, which needs a fill under it ================
+  - variables:
+      t6: "{{ now().strftime('%H:%M:%S') }}"
   - action: glance_clock.set_scene
     data:
       slot: 2
@@ -242,31 +275,27 @@ sequence:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
   - delay: { seconds: 7 }
 
-  # ============ 6. Weather particles, drawn by the clock =================
-  - variables:
-      t6: "{{ now().strftime('%H:%M:%S') }}"
-  - action: glance_clock.set_scene
-    data:
-      slot: 2
-      mode: watchface
-      steps:
-        - type: weather
-          condition: snow
-          position: full
-          intensity: 8
-          seconds: 14
-  - delay: { seconds: 7 }
-
   # ============ 7. Rain, on the clock's own forecast face ================
   # New since version 2. The dial becomes 24 hours rather than 12 here, so the
   # whole ring is tomorrow -- worth saying out loud over a film, because it
   # looks like the same geometry and is not.
+  #
+  # The clock draws its old cloud-fetching indicator for a moment before this
+  # lands, and again before section 8. That is command 35, which every forecast
+  # sends ahead of itself; see async_send_forecast in notify.py. It looks like
+  # the demo stalling and is not.
+  #
+  # On a dry day this draws an almost unlit ring, which is correct rather than
+  # broken. `max_value` is the height of the scale, so dropping it makes light
+  # rain reach further up the ring -- worth lowering if you are filming in fair
+  # weather and want something to see.
   - variables:
       t7: "{{ now().strftime('%H:%M:%S') }}"
   - action: glance_clock.send_rain_forecast
     data:
       weather_entity: "{{ weather }}"
       slot: 2
+      max_value: 0.5
   - delay: { seconds: 7 }
 
   # ============ 8. Daylight, which needs no weather at all ===============
@@ -386,7 +415,7 @@ sequence:
       title: "Glance Clock demo (script v{{ demo_version }})"
       message: >-
         1 palette {{ t1 }} · 2 replace in place {{ t2 }} · 3 firmware animation
-        {{ t3 }} · 4 comet {{ t4 }} · 5 pulse {{ t5 }} · 6 snow {{ t6 }} ·
+        {{ t3 }} · 4 comet {{ t4 }} · 5 snow {{ t5 }} · 6 pulse {{ t6 }} ·
         7 rain forecast {{ t7 }} · 8 daylight {{ t8 }} · 9 factory face {{ t9 }} ·
         10 slot rotation {{ t10 | default('off') }} · 11 refused {{ t11 }} ·
         12 notice {{ t12 }} · 13 finale {{ t13 }}.
