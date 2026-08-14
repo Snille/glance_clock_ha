@@ -1,4 +1,4 @@
-# Demo script version 6.
+# Demo script version 7.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
@@ -21,6 +21,12 @@
 # after it. This is not a demo-only concern -- any automation that writes a
 # long animation and then writes something else has the same trap.
 #
+# Version 7 then found that the rain forecast still showed nothing, and this
+# time the demo was innocent: the forecast said no rain in any of the next 24
+# hours, so every hour was drawn in the dry colour, which is 0x000010. A
+# correct picture of no rain, and a black ring. Section 7 shows the temperature
+# forecast instead, which always has a range and therefore always has a shape.
+#
 # The slot rotation stays commented out. It does not read on film at all.
 #
 # Unlike its neighbours in this directory, this file is in the form the UI
@@ -41,7 +47,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "6"
+  demo_version: "7"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -290,28 +296,41 @@ sequence:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
   - delay: { seconds: 7 }
 
-  # ============ 7. Rain, on the clock's own forecast face ================
-  # New since version 2. The dial becomes 24 hours rather than 12 here, so the
-  # whole ring is tomorrow -- worth saying out loud over a film, because it
-  # looks like the same geometry and is not.
+  # ============ 7. Temperature, on the clock's own forecast face =========
+  # The dial becomes 24 hours rather than 12 here, so the whole ring is
+  # tomorrow -- worth saying out loud over a film, because it looks like the
+  # same geometry and is not. Colour runs blue to red across the day's own
+  # range, so the shape is the shape of the day.
   #
   # The clock draws its old cloud-fetching indicator for a moment before this
   # lands, and again before section 8. That is command 35, which every forecast
   # sends ahead of itself; see async_send_forecast in notify.py. It looks like
   # the demo stalling and is not.
   #
-  # On a dry day this draws an almost unlit ring, which is correct rather than
-  # broken. `max_value` is the height of the scale, so dropping it makes light
-  # rain reach further up the ring -- worth lowering if you are filming in fair
-  # weather and want something to see.
+  # Temperature rather than rain, and that choice was earned. Versions 4 to 6
+  # showed the rain forecast here and NOT ONE FILM EVER SHOWED ANYTHING: on a
+  # dry day every hour is zero, every hour is drawn in the dry colour, and the
+  # dry colour is 0x000010 -- black, near enough. Nothing errors. The service
+  # returns success and draws an unlit ring, which is a correct picture of no
+  # rain and a useless thing to film. Temperature always has a range, so it
+  # always has a shape. To show rain instead, on a day that has some:
+  #
+  #   - action: glance_clock.send_rain_forecast
+  #     data:
+  #       weather_entity: "{{ weather }}"
+  #       slot: 2
+  #       max_value: 0.5
+  #
+  # This one writes to slot 1, not slot 2, so it is cleared below -- otherwise
+  # two filled slots start rotating fifteen seconds apart under the rest.
   - variables:
       t7: "{{ now().strftime('%H:%M:%S') }}"
-  - action: glance_clock.send_rain_forecast
+  - action: glance_clock.send_forecast
     data:
       weather_entity: "{{ weather }}"
-      slot: 2
-      max_value: 0.5
   - delay: { seconds: 7 }
+  - action: glance_clock.clear_leds
+    data: { slot: 1 }
 
   # ============ 8. Daylight, which needs no weather at all ===============
   # Arithmetic from the sun's position rather than a forecast.
@@ -431,7 +450,7 @@ sequence:
       message: >-
         1 palette {{ t1 }} · 2 replace in place {{ t2 }} · 3 firmware animation
         {{ t3 }} · 4 comet {{ t4 }} · 5 snow {{ t5 }} · 6 pulse {{ t6 }} ·
-        7 rain forecast {{ t7 }} · 8 daylight {{ t8 }} · 9 factory face {{ t9 }} ·
+        7 temperature forecast {{ t7 }} · 8 daylight {{ t8 }} · 9 factory face {{ t9 }} ·
         10 slot rotation {{ t10 | default('off') }} · 11 refused {{ t11 }} ·
         12 notice {{ t12 }} · 13 finale {{ t13 }}.
 
