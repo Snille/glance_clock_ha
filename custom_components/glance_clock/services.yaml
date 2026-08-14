@@ -111,7 +111,7 @@ send_notice:
       description: |
         Message text to display. To insert an icon, use [icon:CODE] in your message (e.g., "Wake up! [icon:123]").
 
-        See the full list of available icons: https://github.com/PorlyBe/glance_clock_ha/blob/master/ICONS.md
+        See the full list of available icons: https://github.com/Snille/glance_clock_ha/blob/master/ICONS.md
       required: true
       selector:
         text:

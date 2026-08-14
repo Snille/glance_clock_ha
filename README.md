@@ -18,6 +18,10 @@ Home Assistant custom integration for Glance Clock devices via Bluetooth.
 > with a good deal added and several things fixed, all tested against a real
 > clock. See [HISTORY.md](./HISTORY.md) for what changed and why.
 >
+> **Install from this repository.** The work happens here, and the releases are
+> here; upstream's last change was published in November 2025. Three pull
+> requests are open against it, and they are welcome to everything in them.
+>
 > Glance Clock's manufacturer is gone and the servers with it, so a clock on the
 > wall has nothing left to talk to. This integration is how it gets used again.
 
@@ -136,7 +140,7 @@ Your Glance Clock is now paired and ready to add to Home Assistant.
 2. Click on "Integrations"
 3. Click the three dots in the top right corner
 4. Select "Custom repositories"
-5. Add the repository URL: `https://github.com/PorlyBe/glance_clock_ha`
+5. Add the repository URL: `https://github.com/Snille/glance_clock_ha`
 6. Select category "Integration"
 7. Click "Add"
 8. Find "Glance Clock" in the integration list and click "Download"
@@ -144,7 +148,7 @@ Your Glance Clock is now paired and ready to add to Home Assistant.
 
 ### Manual Installation
 
-1. Download the latest release from the [releases page](https://github.com/PorlyBe/glance_clock_ha/releases)
+1. Download the latest release from the [releases page](https://github.com/Snille/glance_clock_ha/releases)
 2. Extract the `glance_clock` folder to your `custom_components` directory
 3. Restart Home Assistant
 

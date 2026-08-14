@@ -12,21 +12,21 @@
     }
   ],
   "codeowners": [
-    "@PorlyBe"
+    "@Snille"
   ],
   "config_flow": true,
   "dependencies": [
     "bluetooth",
     "bluetooth_adapters"
   ],
-  "documentation": "https://github.com/PorlyBe/glance_clock_ha",
+  "documentation": "https://github.com/Snille/glance_clock_ha",
   "integration_type": "device",
   "iot_class": "local_push",
-  "issue_tracker": "https://github.com/PorlyBe/glance_clock_ha/issues",
+  "issue_tracker": "https://github.com/Snille/glance_clock_ha/issues",
   "requirements": [
     "bleak",
     "bleak-retry-connector",
     "protobuf"
   ],
-  "version": "1.31.0"
+  "version": "1.31.1"
 }

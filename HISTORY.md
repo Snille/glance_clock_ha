@@ -7,6 +7,36 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.31.1] - 2026-08-14
+### Changed
+- **The integration points at this repository now.** `documentation` and `issue_tracker`
+  in the manifest still pointed upstream, so Home Assistant's own "Documentation" and
+  "Report an issue" links sent people to a repository that has not published a change
+  since November 2025 -- and sent bug reports about code written here to somebody who
+  never wrote it. The HACS install URL and the manual-install release link in the README
+  pointed there too. Codeowner is `@Snille` for the same reason.
+
+  What stays pointing upstream: the fork credit at the top of the README, the "upstream
+  project" link under Support, and every link to `PorlyBe/bluetooth-cts`, which is a
+  different project and still the right way to set the clock's time.
+
+### Corrected
+- **A notice takes slot 0, not whatever slot you used.** Between 2026-08-12 and today
+  this repository documented that a notice empties the scene slot and the scene is gone
+  for good. That is true only of slot 0. A scene in any other slot survives: the notice
+  borrows the display for its few seconds and the scene comes back by itself. Four runs
+  on hardware, slots 0, 2 and 6, with sound and without.
+
+  The original test used slot 0 alone, which is where an experiment naturally lands --
+  it is the default for the animation buttons. Keep scenes off slot 0, as the examples
+  do, and the question never arises.
+
+- **Three traps added to the examples' own documentation**, all found while filming the
+  demo: a scene's timeline keeps the display for as long as it runs and hides anything
+  written during it; a forecast sent to a busy display is lost rather than queued; and
+  two Bluetooth writes in the same instant can drop one, with both calls reporting
+  success.
+
 ## [1.31.0] - 2026-08-14
 ### Breaking
 - **`start_scenes` is gone; use `next_scene`.** 1.30.0 kept the old name as an alias to
