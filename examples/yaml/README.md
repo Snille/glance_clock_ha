@@ -100,7 +100,7 @@ with the mute flag alongside as an attribute.
 |---|---|
 | [`glance-say.yaml`](scripts/glance-say.yaml) | `script.glance_say` — one queued entry point for every notice |
 | [`clear-all-slots.yaml`](scripts/clear-all-slots.yaml) | `script.glance_clear_all` — empty every slot when an experiment goes wrong |
-| [`demo-and-self-test.yaml`](scripts/demo-and-self-test.yaml) | About ninety seconds that exercise everything, in an order that reads as a demo |
+| [`demo-and-self-test.yaml`](scripts/demo-and-self-test.yaml) | About a minute that exercises everything, in an order that reads as a demo |
 
 `glance_say` is worth having even in a small setup: `mode: queued` means several
 automations can call it at once and the messages come out one after another
