@@ -1,16 +1,25 @@
-# Demo script version 5.
+# Demo script version 6.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
 # it. Bump it whenever this file changes.
 #
 # Version 1 is the 2026-08-12 film. Version 2 ran about ninety seconds. Version
-# 3 was cut to a minute and proved too rushed to watch -- the clock's own smile
-# face never got past its scrolling intro. Version 4 went back to ninety
-# seconds, and filming it showed two more things worth fixing, both of them in
-# version 5: the comet opened on top of the fire animation still lit underneath
-# it, and the snow sat directly beside the rain forecast, which on a dry day
-# looks like scattered lit pixels and read as the same effect twice.
+# 3 was cut to a minute and proved too rushed to watch. Version 4 went back to
+# ninety seconds, and filming it caught the comet opening on top of the fire
+# animation still lit underneath. Version 5 fixed that.
+#
+# Version 6 fixes something both earlier films had hidden in plain sight: THE
+# RAIN FORECAST HAD NEVER ONCE BEEN SEEN. A scene's `seconds` is how long its
+# timeline runs, and the snow asked for fourteen and the pulse for twelve while
+# each section waits only seven. The animation therefore outlived its own
+# section and kept the display while the next section's scene sat underneath,
+# written and invisible. What looked like "the demo shows snow twice" was the
+# same snow, still falling, straight through the forecast that followed it.
+#
+# THE RULE THAT FALLS OUT OF IT: a scene's `seconds` must not exceed the wait
+# after it. This is not a demo-only concern -- any automation that writes a
+# long animation and then writes something else has the same trap.
 #
 # The slot rotation stays commented out. It does not read on film at all.
 #
@@ -32,7 +41,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "5"
+  demo_version: "6"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -252,7 +261,11 @@ sequence:
           condition: snow
           position: full
           intensity: 8
-          seconds: 14
+          # No longer than this section's own wait. Filmed 2026-08-14: at 14 s
+          # the snow was still falling when the next section wrote its scene,
+          # and it kept the display -- the rain forecast underneath was never
+          # seen at all, twice over, in two separate films.
+          seconds: 7
   - delay: { seconds: 7 }
 
   # ============ 6. An effect, which needs a fill under it ================
@@ -270,7 +283,9 @@ sequence:
           effect: pulse
           rise: 20
           fall: 80
-          seconds: 12
+          # Same rule as the snow above: never longer than the wait that
+          # follows, or this outlives its section and paints over the next one.
+          seconds: 7
           segments:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
   - delay: { seconds: 7 }

@@ -548,6 +548,21 @@ round lengths down to a multiple of 8.
 
 **No sound.** The clock is muted. There is a switch for it on the device page.
 
+**I wrote a scene and the previous one kept playing.** Check the `seconds` on
+the scene before it. A scene's timeline runs for as long as it asks for,
+regardless of what you write afterwards, and while it runs it holds the
+display -- the new scene is written and simply not seen.
+
+Found 2026-08-14, in this repo's own demo script, and it had been hiding in two
+separate films. The snow asked for fourteen seconds and the pulse for twelve,
+while each section moved on after seven. The rain forecast that followed them
+had never once been visible; what looked like the demo showing snow twice was
+one snowfall running straight through the next section. Nothing errored, and
+both calls returned success.
+
+**The rule: a scene's `seconds` must not outlast the gap before the next
+write.** It is worth checking whenever a scene appears to be ignored.
+
 **The colour is wrong, or white.** A name outside the palette. In `send_notice`
 that silently becomes white; everywhere else it raises with the full list.
 
