@@ -3,6 +3,11 @@
 # Two things at once: a scene that is the standing state, and a repeated notice
 # that gets you out of your chair. The scene is cleared when the sensor does.
 #
+# This works because the scene is in slot 6. A notice takes slot 0 for itself,
+# so a standing scene parked there would be destroyed by the first announcement;
+# anywhere else it comes back on its own after the notice hands the display
+# back. Verified against hardware 2026-08-14.
+#
 # `priority` is a byte the firmware interprets, and how it weighs one notice
 # against another is the firmware's business. Whether `critical` overrides a DND
 # window has NOT been tested here, so do not build a smoke alarm on the
@@ -32,6 +37,10 @@ actions:
           seconds: 14
           segments:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: red }
+  # Let the scene land before the first announcement goes out. Two Bluetooth
+  # writes in the same instant and one of them can be dropped -- the call still
+  # reports success, and nothing is drawn.
+  - delay: "00:00:02"
   - repeat:
       while:
         - condition: state

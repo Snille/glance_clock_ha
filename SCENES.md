@@ -588,19 +588,26 @@ that silently becomes white; everywhere else it raises with the full list.
 **The block smeared instead of moving.** Fills persist — paint black over the
 previous position.
 
-**A notice wiped my scene.** Expected, and not recoverable. A notice empties the
-slot rather than borrowing the display: after it finishes, the scene is gone and
-no playback command brings it back -- 31, 35 and 30+31 were all tried on
-hardware 2026-08-12, with and without sound, and none of them restored anything.
+**A notice wiped my scene.** It was in slot 0. **A notice takes slot 0 for
+itself**, so a scene parked there is destroyed and does not come back. A scene
+in any other slot survives: the notice borrows the display for its few seconds
+and the scene returns on its own afterwards.
 
-The integration deliberately does not cache scenes to re-send them. It would
-mean a background task per notice, bookkeeping against `clear_leds`, and a
-lifetime across restarts, all for a case that comes up rarely: wanting an
-animation to keep running *underneath* a passing message.
+Measured 2026-08-14, four runs. Slots 2 and 6 came back and stayed, with sound
+and without. Slot 0 was gone, and the clock sat idle afterwards.
 
-If that is what you want, do not send a notice at all -- **put the text in the
-scene**, as a `text` step. It lives in the slot with everything else and nothing
-interrupts anything. See
+This corrects what this file said between 2026-08-12 and 2026-08-14, which was
+that a notice empties the slot whatever slot you used and the scene is not
+recoverable. That was tested against slot 0 alone, and slot 0 is the one case
+where it holds. Why it stayed unchallenged: slot 0 is also the default for the
+animation buttons, so it is where an experiment naturally lands.
+
+**Keep scenes off slot 0 and this never arises.** The examples start at slot 2
+for that reason, and slot 1 belongs to `send_forecast`.
+
+If you want text over a picture with no interruption at all, the other route is
+still there: **put the text in the scene**, as a `text` step, and nothing
+borrows anything. See
 [`text-with-sound.yaml`](./examples/yaml/scenes/text-with-sound.yaml).
 
 The limit worth knowing: a scene cannot carry the firmware animations. `fire`,

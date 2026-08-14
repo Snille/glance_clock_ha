@@ -24,17 +24,27 @@ For the drawing model these flows assume — ring geometry, the fixed palette,
 scene slots, step types — see [SCENES.md](../../SCENES.md). For the same ideas
 as Home Assistant automations, see [`../yaml/`](../yaml/).
 
-## The two things worth knowing first
+## The three things worth knowing first
 
 **A scene stays in its slot.** It does not vanish when its lifetime runs out —
 it stays and replays until something clears the slot. Use `clear_leds` with the
 same slot when you want it gone. This is the single most surprising thing about
 the clock, and it will look like a bug the first time it happens.
 
+**It also keeps the display for as long as its timeline runs.** `seconds` bounds
+the animation, and nothing written during it is seen — a flow that fires two
+scenes a few seconds apart shows only the first. Never let a timeline outlast
+the gap before the next write. The same rule sinks forecasts, which are lost
+rather than queued if the display is busy: `clear_leds` first, then send.
+
 **A notice interrupts, a scene joins.** Both appear at once. The difference is
 what happens afterwards: a notice takes the display and hands it back, a scene
 sits alongside the time until its slot is cleared. Announce with a notice, show
 with a scene.
+
+One exception to that: a notice takes **slot 0** for itself, so a scene parked
+there is destroyed rather than handed back. Start your scenes at slot 2, which
+these flows do.
 
 ## Weather on the rings
 

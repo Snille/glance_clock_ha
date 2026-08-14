@@ -139,13 +139,28 @@ data:
   slot: 3
 ```
 
-## Two things that will look like bugs
+## Four things that will look like bugs
 
 **A short scene runs, then stands still.** It finishes its timeline and waits
-for the engine's next pass — about twelve seconds — before repeating. Build a
-timeline of roughly 15 seconds if you want continuous motion.
+for the engine's next pass — about twelve seconds — before repeating. A timeline
+of roughly 15 seconds gives continuous motion — but read the next one before you
+reach for it.
+
+**A long timeline paints over whatever comes next.** `seconds` is how long the
+animation *runs*, and it keeps the display for all of it. Write a 15-second
+scene and then write something else five seconds later, and the second one is
+invisible until the first finishes. Never let a timeline outlast the gap before
+the next write.
+
+**A forecast sent to a busy display is lost.** Not queued — lost. `clear_leds`
+on the slot first, then send it. Unlike a scene, a forecast does not stay: it
+holds the display for about fifteen seconds and hands it back by itself.
 
 **The scene will not go away.** Scenes persist in their slot and replay until
 cleared. Ending a lifetime does not remove one.
+
+And one that only bites on slot 0: **a notice takes slot 0 for itself**, so a
+scene parked there is destroyed by the first notice. Scenes in other slots
+survive and come back. The examples start at slot 2.
 
 The longer list is at the end of [SCENES.md](../../SCENES.md#things-that-will-look-like-bugs).
