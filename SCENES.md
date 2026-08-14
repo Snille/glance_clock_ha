@@ -548,6 +548,23 @@ round lengths down to a multiple of 8.
 
 **No sound.** The clock is muted. There is a switch for it on the device page.
 
+**I sent a forecast and nothing happened.** A forecast needs the display free.
+Sent while a scene still occupies its slot, it is lost outright rather than
+queued -- clearing the slot afterwards gives you an idle clock, not the
+forecast that was sent in the meantime.
+
+This is worth separating from the rule below, because it is a different
+mechanism. A scene's `seconds` bounds how long its *timeline animates*, not how
+long it *holds the slot*: when the animation ends the scene is still there,
+still drawn, still owning the display, until something clears it. Measured
+2026-08-14 against the pulse in this repo's demo. On film it looked like the
+pulse returning after each cloud-fetching indicator, over and over, with the
+forecast never appearing at all.
+
+**`clear_leds` on the slot first, then send the forecast.** Unlike a scene, a
+forecast does not stay: it holds the display for about fifteen seconds and
+hands it back on its own.
+
 **I wrote a scene and the previous one kept playing.** Check the `seconds` on
 the scene before it. A scene's timeline runs for as long as it asks for,
 regardless of what you write afterwards, and while it runs it holds the

@@ -1,4 +1,4 @@
-# Demo script version 8.
+# Demo script version 9.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
@@ -39,6 +39,12 @@
 # notice ahead of each, which costs about three seconds apiece and empties the
 # slot on its way past.
 #
+# Version 9 clears slot 2 before the forecasts. A scene keeps its slot and the
+# display after its animation ends -- `seconds` bounds the animation, not the
+# occupancy -- and a forecast sent to an occupied display is lost outright. On
+# film that was the pulse coming back after each cloud-fetching indicator with
+# no forecast in between.
+#
 # The slot rotation stays commented out. It does not read on film at all.
 #
 # Unlike its neighbours in this directory, this file is in the form the UI
@@ -59,7 +65,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "8"
+  demo_version: "9"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -347,12 +353,25 @@ sequence:
           segments:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
   - delay: { seconds: 7 }
+  # Empty the slot before the forecast below. A SCENE STAYS IN ITS SLOT AND
+  # KEEPS THE DISPLAY when its timeline ends -- `seconds` bounds the animation,
+  # not the occupancy -- and a forecast sent to an occupied display is lost
+  # outright, not queued. Measured 2026-08-14: with the pulse still in slot 2 a
+  # forecast changed nothing, and clearing the slot afterwards revealed an idle
+  # clock rather than the forecast. What that looked like on film was the pulse
+  # coming back after each cloud-fetching indicator, twice over.
+  - action: glance_clock.clear_leds
+    data: { slot: 2 }
+  - delay: { seconds: 1 }
 
   # ============ 7. Temperature, on the clock's own forecast face =========
   # The dial becomes 24 hours rather than 12 here, so the whole ring is
   # tomorrow -- worth saying out loud over a film, because it looks like the
   # same geometry and is not. Colour runs blue to red across the day's own
   # range, so the shape is the shape of the day.
+  #
+  # Unlike a scene this one does not stay: it holds the display for about
+  # fifteen seconds and then hands it back to the idle face by itself.
   #
   # The clock draws its old cloud-fetching indicator for a moment before this
   # lands, and again before section 8. That is command 35, which every forecast
