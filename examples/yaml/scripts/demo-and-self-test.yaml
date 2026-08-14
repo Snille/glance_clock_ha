@@ -1,11 +1,13 @@
-# Demo script version 3.
+# Demo script version 4.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
 # it. Bump it whenever this file changes. Version 1 is the 2026-08-12 film,
-# version 2 ran about ninety seconds, version 3 is cut to about a minute and
-# carries what was learned since -- the forecast faces, the clock's own faces,
-# and the scene rotation.
+# version 2 ran about ninety seconds, version 3 was cut to a minute and proved
+# too rushed to watch -- the clock's own smile face never got past its scrolling
+# intro. Version 4 goes back to about ninety seconds and spends them on what is
+# actually visible: the forecast faces and the clock's own faces are in, and the
+# slot rotation is commented out because it did not read on film at all.
 #
 # Unlike its neighbours in this directory, this file is in the form the UI
 # script editor wants -- it starts at `alias:` with no key above it. Paste the
@@ -16,7 +18,7 @@
 alias: Glance Clock - full demo and self test
 description: >-
   Walks everything the integration can do, in an order that reads as a demo.
-  About a minute. Every wait is sized for the eye rather than for the scene
+  About ninety seconds. Every wait is sized for the eye rather than for the scene
   engine, and each was measured against a film of an actual run. Each section
   has its own colour, so a still frame says which one it came from. Ends with a
   clear finale so a recording knows when to stop. Change the entity ids at the
@@ -25,7 +27,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "3"
+  demo_version: "4"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -83,7 +85,7 @@ sequence:
         - { start: 12, length: 12, ring: 0, rings_tall: 4, color: dark_orange }
         - { start: 24, length: 12, ring: 0, rings_tall: 4, color: lawn_green }
         - { start: 36, length: 12, ring: 0, rings_tall: 4, color: blue_violet }
-  - delay: { seconds: 3 }
+  - delay: { seconds: 5 }
 
   # ============ 2. Replacing a scene in place ============================
   # Same slot, no clearing in between. Since 1.25.0 the new scene simply
@@ -97,20 +99,20 @@ sequence:
         - { start: 0, length: 48, ring: 0, rings_tall: 1, color: dark_green }
         - { start: 0, length: 32, ring: 0, rings_tall: 1, color: aqua }
         - { start: 0, length: 48, ring: 2, rings_tall: 2, color: indigo }
-  - delay: { seconds: 3 }
+  - delay: { seconds: 5 }
 
   # ============ 3. A firmware animation ==================================
   - variables:
       t3: "{{ now().strftime('%H:%M:%S') }}"
   - action: glance_clock.set_animation
     data: { animation: fire, color: orange_red, slot: 2, speed: 4 }
-  - delay: { seconds: 4 }
+  - delay: { seconds: 6 }
 
   # ============ 4. A scene you wrote yourself ============================
   # A comet: each step paints the head, dims the last position, and blacks out
   # the one before. Persistence is what makes it move rather than accumulate.
   #
-  # Two laps rather than one. A single lap is under two seconds, and because the
+  # Three laps rather than one. A single lap is under two seconds, and because the
   # timeline ends by painting itself black the slot then sits empty -- which
   # films as a broken clock rather than a finished animation. Erasing yourself
   # is right; being short is what makes it look wrong. Fill the window instead.
@@ -181,14 +183,44 @@ sequence:
             - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
             - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
             - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.3
+          segments:
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.3
+          segments:
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.3
+          segments:
+            - { start: 0, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.3
+          segments:
+            - { start: 8, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.3
+          segments:
+            - { start: 16, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: white }
+        - seconds: 0.3
+          segments:
+            - { start: 24, length: 8, ring: 0, rings_tall: 4, color: black }
+            - { start: 32, length: 8, ring: 0, rings_tall: 4, color: royal_blue }
+            - { start: 40, length: 8, ring: 0, rings_tall: 4, color: white }
         # Sweep up after yourself, or the head and tail stay lit between runs.
         - seconds: 0.3
           segments:
             - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
             - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
-  # Thirteen steps of 0.3 s is 3.9 s of comet. Do not wait much longer than the
+  # Nineteen steps of 0.3 s is 5.7 s of comet. Do not wait much longer than the
   # timeline lasts, or you are filming an empty slot.
-  - delay: { seconds: 4 }
+  - delay: { seconds: 6 }
 
   # ============ 5. An effect, which needs a fill under it ================
   - variables:
@@ -208,7 +240,7 @@ sequence:
           seconds: 12
           segments:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
-  - delay: { seconds: 4 }
+  - delay: { seconds: 7 }
 
   # ============ 6. Weather particles, drawn by the clock =================
   - variables:
@@ -223,7 +255,7 @@ sequence:
           position: full
           intensity: 8
           seconds: 14
-  - delay: { seconds: 4 }
+  - delay: { seconds: 7 }
 
   # ============ 7. Rain, on the clock's own forecast face ================
   # New since version 2. The dial becomes 24 hours rather than 12 here, so the
@@ -235,7 +267,7 @@ sequence:
     data:
       weather_entity: "{{ weather }}"
       slot: 2
-  - delay: { seconds: 4 }
+  - delay: { seconds: 7 }
 
   # ============ 8. Daylight, which needs no weather at all ===============
   # Arithmetic from the sun's position rather than a forecast.
@@ -244,7 +276,7 @@ sequence:
   - action: glance_clock.send_daylight_forecast
     data:
       slot: 2
-  - delay: { seconds: 4 }
+  - delay: { seconds: 7 }
 
   # ============ 9. The clock's own built-in faces ========================
   # Nothing of ours is on screen for this one -- this is firmware, drawn from
@@ -255,48 +287,59 @@ sequence:
     data: { slot: 2 }
   - action: select.select_option
     target: { entity_id: "{{ factory }}" }
-    data: { option: smile }
-  - delay: { seconds: 4 }
+    data: { option: weather }
+  - delay: { seconds: 10 }
   - action: select.select_option
     target: { entity_id: "{{ factory }}" }
     data: { option: "off" }
 
   # ============ 10. Several slots, and stepping between them =============
-  # New since version 2, and the part that took the longest to understand. With
-  # more than one slot filled the clock rotates between them by itself, fifteen
-  # seconds each. Nobody is filming forty-five seconds of that, so Next Scene
-  # steps the rotation forward on demand.
+  # COMMENTED OUT ON PURPOSE. It does not read on film, so it is dead weight in
+  # a recording -- but it is kept here because it works and is worth running by
+  # hand. Uncomment the block, and restore `{{ t10 }}` in the closing
+  # notification, to put it back.
   #
-  # Until 1.31.0 that button was called Scene Playback Start, on the belief that
-  # 31 started the scene engine. It steps. See SCENES.md.
-  - variables:
-      t10: "{{ now().strftime('%H:%M:%S') }}"
-  - action: glance_clock.set_leds
-    data:
-      slot: 3
-      segments: [{ start: 0, length: 48, ring: 0, rings_tall: 4, color: red }]
-  - action: glance_clock.set_leds
-    data:
-      slot: 4
-      segments: [{ start: 0, length: 48, ring: 0, rings_tall: 4, color: royal_blue }]
-  - action: glance_clock.set_leds
-    data:
-      slot: 5
-      segments: [{ start: 0, length: 48, ring: 0, rings_tall: 4, color: lawn_green }]
-  - delay: { seconds: 2 }
-  - action: button.press
-    target: { entity_id: "{{ next_scene }}" }
-  - delay: { seconds: 2 }
-  - action: button.press
-    target: { entity_id: "{{ next_scene }}" }
-  - delay: { seconds: 2 }
-  - action: glance_clock.clear_leds
-    data: { slot: 3 }
-  - action: glance_clock.clear_leds
-    data: { slot: 4 }
-  - action: glance_clock.clear_leds
-    data: { slot: 5 }
-  - delay: { seconds: 1 }
+  # With more than one slot filled the clock rotates between them by itself,
+  # fifteen seconds each. Nobody is filming forty-five seconds of that, so Next
+  # Scene steps the rotation forward on demand. Until 1.31.0 that button was
+  # called Scene Playback Start, on the belief that 31 started the scene engine.
+  # It steps. See SCENES.md.
+  #
+  # OPEN: the stepping demonstrably happens -- the clock's own pushed slot
+  # number went 4, 3, 5 on 2026-08-14, one step per press -- but watching the
+  # dial during a full run of this script showed nothing changing. Whether the
+  # solid rings are simply too alike to read on film, or something earlier in
+  # the script leaves the display owned by another scene, is not worked out.
+  # Do not take the silence for a broken button without checking that first.
+  #
+  # - variables:
+  #     t10: "{{ now().strftime('%H:%M:%S') }}"
+  # - action: glance_clock.set_leds
+  #   data:
+  #     slot: 3
+  #     segments: [{ start: 0, length: 48, ring: 0, rings_tall: 4, color: red }]
+  # - action: glance_clock.set_leds
+  #   data:
+  #     slot: 4
+  #     segments: [{ start: 0, length: 48, ring: 0, rings_tall: 4, color: royal_blue }]
+  # - action: glance_clock.set_leds
+  #   data:
+  #     slot: 5
+  #     segments: [{ start: 0, length: 48, ring: 0, rings_tall: 4, color: lawn_green }]
+  # - delay: { seconds: 2 }
+  # - action: button.press
+  #   target: { entity_id: "{{ next_scene }}" }
+  # - delay: { seconds: 3 }
+  # - action: button.press
+  #   target: { entity_id: "{{ next_scene }}" }
+  # - delay: { seconds: 3 }
+  # - action: glance_clock.clear_leds
+  #   data: { slot: 3 }
+  # - action: glance_clock.clear_leds
+  #   data: { slot: 4 }
+  # - action: glance_clock.clear_leds
+  #   data: { slot: 5 }
+  # - delay: { seconds: 1 }
 
   # ============ 11. Something that cannot work, refused ==================
   # Invisible on film, and there on purpose: it should go red in the trace and
@@ -317,7 +360,7 @@ sequence:
     data:
       title: "Delivery"
       message: "PARCEL HAS ARRIVED [sound:bells] [anim:pulse] [color:dark_magenta]"
-  - delay: { seconds: 5 }
+  - delay: { seconds: 6 }
 
   # ============ 13. Finale: stop recording when the clock goes plain =====
   # A notice rather than a scene, deliberately. Pressing Next Scene by hand --
@@ -336,7 +379,7 @@ sequence:
   # Everything off. The clock returning to a plain face is the cue to stop.
   - action: button.press
     target: { entity_id: "{{ clear_all }}" }
-  - delay: { seconds: 2 }
+  - delay: { seconds: 1 }
 
   - action: persistent_notification.create
     data:
@@ -345,8 +388,8 @@ sequence:
         1 palette {{ t1 }} · 2 replace in place {{ t2 }} · 3 firmware animation
         {{ t3 }} · 4 comet {{ t4 }} · 5 pulse {{ t5 }} · 6 snow {{ t6 }} ·
         7 rain forecast {{ t7 }} · 8 daylight {{ t8 }} · 9 factory face {{ t9 }} ·
-        10 slot rotation {{ t10 }} · 11 refused {{ t11 }} · 12 notice {{ t12 }} ·
-        13 finale {{ t13 }}.
+        10 slot rotation {{ t10 | default('off') }} · 11 refused {{ t11 }} ·
+        12 notice {{ t12 }} · 13 finale {{ t13 }}.
 
         Sensors: busy={{ states(busy) }}, dnd={{ states(dnd) }},
         muted={{ states(mute) }}, slot={{ states(slot_number) }}.
