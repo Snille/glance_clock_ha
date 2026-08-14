@@ -1,4 +1,4 @@
-# Demo script version 7.
+# Demo script version 8.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
@@ -27,6 +27,18 @@
 # correct picture of no rain, and a black ring. Section 7 shows the temperature
 # forecast instead, which always has a range and therefore always has a shape.
 #
+# Version 8 labels itself. Each scene-based section carries its own name as a
+# text step running alongside the picture, which costs no time at all. Those
+# sections are in `exclusive` mode for it: the label and the digital clock both
+# want the matrix, and sharing it puts one on top of the other. Exclusive hides
+# the digital face while the section runs, which is the price of the caption.
+#
+# Sections 3, 7, 8 and 9 -- the firmware animation, both forecasts and the
+# clock's own face -- carry no label. The clock draws those itself and there is
+# no timeline of ours to hang a text step on. Labelling them would mean a
+# notice ahead of each, which costs about three seconds apiece and empties the
+# slot on its way past.
+#
 # The slot rotation stays commented out. It does not read on film at all.
 #
 # Unlike its neighbours in this directory, this file is in the form the UI
@@ -47,7 +59,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "7"
+  demo_version: "8"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -95,16 +107,30 @@ sequence:
   # ============ 1. The palette and the geometry ==========================
   # Four quarters, one per hour hand position. 48 pixels over 12 hours means
   # one hour is exactly 4 pixels, so these land on 12, 3, 6 and 9.
+  # Written with set_scene rather than set_leds so it can carry its own label.
+  # set_leds takes segments but no steps, and a label is a text step. The
+  # picture is identical; only the service differs.
   - variables:
       t1: "{{ now().strftime('%H:%M:%S') }}"
-  - action: glance_clock.set_leds
+  - action: glance_clock.set_scene
     data:
       slot: 2
-      segments:
-        - { start: 0, length: 12, ring: 0, rings_tall: 4, color: red }
-        - { start: 12, length: 12, ring: 0, rings_tall: 4, color: dark_orange }
-        - { start: 24, length: 12, ring: 0, rings_tall: 4, color: lawn_green }
-        - { start: 36, length: 12, ring: 0, rings_tall: 4, color: blue_violet }
+      mode: exclusive
+      steps:
+        - at: 0
+          seconds: 5
+          segments:
+            - { start: 0, length: 12, ring: 0, rings_tall: 4, color: red }
+            - { start: 12, length: 12, ring: 0, rings_tall: 4, color: dark_orange }
+            - { start: 24, length: 12, ring: 0, rings_tall: 4, color: lawn_green }
+            - { start: 36, length: 12, ring: 0, rings_tall: 4, color: blue_violet }
+        # The label. `at: 0` puts it alongside the fill rather than after it,
+        # and it comes last so the steps above still chain from zero.
+        - at: 0
+          type: text
+          text: "PALETTE"
+          scroll: repeat
+          seconds: 5
   - delay: { seconds: 5 }
 
   # ============ 2. Replacing a scene in place ============================
@@ -112,13 +138,22 @@ sequence:
   # replaces the old one and shows at once.
   - variables:
       t2: "{{ now().strftime('%H:%M:%S') }}"
-  - action: glance_clock.set_leds
+  - action: glance_clock.set_scene
     data:
       slot: 2
-      segments:
-        - { start: 0, length: 48, ring: 0, rings_tall: 1, color: dark_green }
-        - { start: 0, length: 32, ring: 0, rings_tall: 1, color: aqua }
-        - { start: 0, length: 48, ring: 2, rings_tall: 2, color: indigo }
+      mode: exclusive
+      steps:
+        - at: 0
+          seconds: 5
+          segments:
+            - { start: 0, length: 48, ring: 0, rings_tall: 1, color: dark_green }
+            - { start: 0, length: 32, ring: 0, rings_tall: 1, color: aqua }
+            - { start: 0, length: 48, ring: 2, rings_tall: 2, color: indigo }
+        - at: 0
+          type: text
+          text: "REPLACE IN PLACE"
+          scroll: repeat
+          seconds: 5
   - delay: { seconds: 5 }
 
   # ============ 3. A firmware animation ==================================
@@ -141,7 +176,7 @@ sequence:
   - action: glance_clock.set_scene
     data:
       slot: 2
-      mode: watchface
+      mode: exclusive
       steps:
         # Wipe the ring first. Filmed 2026-08-14: without this the comet's
         # opening frame lands on top of whatever the previous section left lit
@@ -246,6 +281,11 @@ sequence:
           segments:
             - { start: 32, length: 8, ring: 0, rings_tall: 4, color: black }
             - { start: 40, length: 8, ring: 0, rings_tall: 4, color: black }
+        - at: 0
+          type: text
+          text: "COMET"
+          scroll: repeat
+          seconds: 6
   # A wipe plus nineteen steps of 0.3 s is 5.8 s of comet. Do not wait much longer than the
   # timeline lasts, or you are filming an empty slot.
   - delay: { seconds: 6 }
@@ -261,9 +301,15 @@ sequence:
   - action: glance_clock.set_scene
     data:
       slot: 2
-      mode: watchface
+      mode: exclusive
       steps:
-        - type: weather
+        - at: 0
+          type: text
+          text: "SNOW"
+          scroll: repeat
+          seconds: 7
+        - at: 0
+          type: weather
           condition: snow
           position: full
           intensity: 8
@@ -280,12 +326,18 @@ sequence:
   - action: glance_clock.set_scene
     data:
       slot: 2
-      mode: watchface
+      mode: exclusive
       steps:
         - seconds: 0.2
           segments:
             - { start: 0, length: 48, ring: 0, rings_tall: 4, color: medium_violet_red }
-        - type: effect
+        - at: 0
+          type: text
+          text: "PULSE"
+          scroll: repeat
+          seconds: 7
+        - at: 0
+          type: effect
           effect: pulse
           rise: 20
           fall: 80
