@@ -1,4 +1,4 @@
-# Demo script version 9.
+# Demo script version 10.
 #
 # The version lives in `demo_version` below and is printed in the notification
 # the run leaves behind, so a film can be matched to the script that produced
@@ -45,6 +45,12 @@
 # film that was the pulse coming back after each cloud-fetching indicator with
 # no forecast in between.
 #
+# Version 10 spaces out the end. The parcel notice was going out inside the
+# same second as the factory face being switched off, and it never reached the
+# dial: the call succeeded, the clock's pushed display byte never moved, and
+# the identical notice sent on its own a minute later worked. Two BLE writes
+# back to back, one dropped. Both films since version 8 end on nothing.
+#
 # The slot rotation stays commented out. It does not read on film at all.
 #
 # Unlike its neighbours in this directory, this file is in the form the UI
@@ -65,7 +71,7 @@ mode: single
 icon: mdi:play-box-outline
 
 variables:
-  demo_version: "9"
+  demo_version: "10"
   # Yours will differ. Settings -> Devices -> your clock lists them all.
   # Note run_animation and stop_animation: those entity ids were frozen before
   # the buttons were renamed to "Animation Run" and "Animation Stop", and a
@@ -426,6 +432,12 @@ sequence:
   - action: select.select_option
     target: { entity_id: "{{ factory }}" }
     data: { option: "off" }
+  # Let that land before anything else is written. Traced 2026-08-14: the
+  # parcel notice went out inside the same second as this face change and never
+  # reached the dial -- the call succeeded, the clock's pushed display byte
+  # never moved, and the same notice sent on its own a minute later worked
+  # perfectly. Two BLE writes back to back, and one of them is dropped.
+  - delay: { seconds: 2 }
 
   # ============ 10. Several slots, and stepping between them =============
   # COMMENTED OUT ON PURPOSE. It does not read on film, so it is dead weight in
@@ -477,7 +489,9 @@ sequence:
 
   # ============ 11. Something that cannot work, refused ==================
   # Invisible on film, and there on purpose: it should go red in the trace and
-  # list the whole palette. continue_on_error so the finale still runs.
+  # list the whole palette. `continue_on_error` keeps the run going -- it logs
+  # the refusal and carries on, which is exactly what is wanted here, and the
+  # closing notification below is the proof that the rest still ran.
   - variables:
       t11: "{{ now().strftime('%H:%M:%S') }}"
   - action: glance_clock.send_notice
@@ -485,6 +499,9 @@ sequence:
     data:
       text: "SHOULD FAIL"
       color: chartreuse
+  # Nothing reaches the clock here, so this pause is only to keep the refusal
+  # from sharing a second with the notice below.
+  - delay: { seconds: 1 }
 
   # ============ 12. A notice, which interrupts ===========================
   - variables:
