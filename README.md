@@ -4,6 +4,14 @@
 [![GitHub Release](https://img.shields.io/github/release/Snille/glance_clock_ha.svg)](https://github.com/Snille/glance_clock_ha/releases)
 [![License](https://img.shields.io/github/license/Snille/glance_clock_ha.svg)](LICENSE)
 
+[![Watch the demo: ninety seconds of a real Glance Clock](docs/demo-thumbnail.jpg)](https://youtu.be/kF9T8gqiQFs)
+
+*Ninety seconds on real hardware: the palette and the ring geometry, a scene
+replaced in place, a firmware animation, a comet written by hand, snow, a
+pulse, the temperature and daylight forecast faces, one of the clock's own
+faces, a notice, and the finale. The script that produced it is
+[`examples/yaml/scripts/demo-and-self-test.yaml`](examples/yaml/scripts/demo-and-self-test.yaml).*
+
 Home Assistant custom integration for Glance Clock devices via Bluetooth.
 
 > **This is a fork of [PorlyBe/glance_clock_ha](https://github.com/PorlyBe/glance_clock_ha)**
