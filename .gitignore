@@ -1,1 +1,6 @@
 __pycache__
+.pytest_cache/
+
+# Films of the clock live outside the repo -- see the README. Git keeps a
+# binary forever, and one clip is a hundred times the size of the history.
+*.mp4
