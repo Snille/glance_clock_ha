@@ -713,13 +713,6 @@ next_scene:
     which is why a scene write sends this to make the new scene appear at once.
     Sending it by hand delays the next scene write until the following tick.
 
-start_scenes:
-  name: Start scene playback (alias for Next scene)
-  description: >-
-    Sends command 31, exactly as Next scene does. Kept under its old name so
-    automations and Node-RED flows written against earlier versions keep
-    working. Prefer Next scene, which says what the command actually does.
-
 send_rain_forecast:
   name: Send rain forecast
   description: >-

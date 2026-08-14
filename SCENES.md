@@ -634,8 +634,10 @@ long is that both readings predict the same thing when only one slot is filled â
 Command 31 was sent three times, four seconds apart, with nothing else going on.
 The displayed slot changed on each one, off the fifteen-second beat, and the
 dwell timer restarted from the command. A command that merely started playback
-already running would have done nothing at all. So 31 advances, and
-`next_scene` describes it better than `start_scenes` does.
+already running would have done nothing at all. So 31 advances, and the service
+is `next_scene`. The old `start_scenes` was removed outright rather than kept as
+an alias: a name describing behaviour the command does not have is exactly what
+made this take two attempts to work out.
 
 Command 30 is the one this integration had right. Each 30 cleared the
 `scenes_enabled` bit in the state word, `0x2204` to `0x2200`, and the display

@@ -70,14 +70,14 @@ def test_every_named_command_builds_a_four_byte_envelope():
         ("stop_timer", 10),
         ("stop_alarm", 20),
         ("stop_scenes", 30),
-        ("start_scenes", 31),
+        ("next_scene", 31),
     ],
 )
 def test_the_numbers_are_the_ones_observed(name, number):
     assert commands.build_command(name)[0] == number
 
 
-def test_playback_start_is_the_frame_scene_writes_already_send():
+def test_next_scene_is_the_frame_scene_writes_already_send():
     """notify.py sends bytes([31, 0, 0, 0]) after every scene write.
 
     If that stops matching, one of the two is wrong and scenes will either
@@ -85,17 +85,18 @@ def test_playback_start_is_the_frame_scene_writes_already_send():
     """
     source = (COMPONENT / "notify.py").read_text(encoding="utf-8")
     assert "bytes([31, 0, 0, 0])" in source
-    assert commands.build_command("start_scenes") == bytes([31, 0, 0, 0])
+    assert commands.build_command("next_scene") == bytes([31, 0, 0, 0])
 
 
-def test_next_scene_and_start_scenes_are_the_same_frame():
+def test_next_scene_sends_31_and_the_old_name_is_gone():
     """31 was measured stepping to the next scene, not starting playback.
 
-    `start_scenes` is kept as an alias so existing automations and Node-RED
-    flows keep working, so the two must not drift apart.
+    The old `start_scenes` was removed rather than aliased: a name describing
+    behaviour the command does not have is what made this take two attempts to
+    work out in the first place.
     """
     assert commands.build_command("next_scene") == bytes([31, 0, 0, 0])
-    assert commands.build_command("start_scenes") == commands.build_command("next_scene")
+    assert "start_scenes" not in commands.NAMED_COMMANDS
 
 
 def test_an_unknown_name_is_refused_with_the_alternatives():

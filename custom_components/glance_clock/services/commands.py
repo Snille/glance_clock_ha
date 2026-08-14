@@ -12,8 +12,9 @@ with mrmstn/glance_clock_ha, which called them `previous_scene`/`next_scene`.
 three slots filled and nothing else going on, it changed the displayed slot
 each time -- off the fifteen-second rotation beat, restarting the dwell timer
 from the command. Something that only started playback already running would
-have done nothing. So the service is `next_scene` now, with `start_scenes`
-kept as an alias.
+have done nothing. So the service is `next_scene`, and the old `start_scenes`
+is gone rather than kept as an alias -- a name that describes the wrong
+behaviour costs more later than a rename costs now.
 
 **30 stops playback.** Each 30 cleared the `scenes_enabled` bit in the state
 word, 0x2204 -> 0x2200, and the display went idle. A step to the previous scene
@@ -45,9 +46,6 @@ NAMED_COMMANDS = {
     "stop_alarm": 20,
     "stop_scenes": 30,
     "next_scene": 31,
-    #: Alias, kept because automations and Node-RED flows written against
-    #: earlier versions call it. Sends 31, exactly as next_scene does.
-    "start_scenes": 31,
 }
 
 

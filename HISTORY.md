@@ -7,6 +7,18 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.31.0] - 2026-08-14
+### Breaking
+- **`start_scenes` is gone; use `next_scene`.** 1.30.0 kept the old name as an alias to
+  spare existing automations. That was the wrong call: the whole reason this question took
+  two attempts to settle is that a command was named for behaviour it does not have, and
+  leaving that name in the service list preserves the same trap for whoever reads it next.
+  The alias is removed, and the button's key was renamed with it.
+
+  **Upgrading leaves one orphaned button entity** ending in `_scene_playback_start`, since
+  the unique id changed. Delete it from the entity registry; the replacement is
+  `..._next_scene`, reading **Next Scene**.
+
 ## [1.30.0] - 2026-08-14
 ### Settled
 - **Command 31 steps to the next scene. It does not start playback.** 1.29.0 and 1.29.1
