@@ -7,6 +7,45 @@ a conclusion was later found to be wrong, the correction is left in place
 rather than the claim quietly removed.
 
 
+## [1.30.0] - 2026-08-14
+### Settled
+- **Command 31 steps to the next scene. It does not start playback.** 1.29.0 and 1.29.1
+  listed this as the last open protocol question, with this integration calling 30 and 31
+  stop and start, and mrmstn/glance_clock_ha calling them `previous_scene` and
+  `next_scene`. Three slots were filled with distinct colours and 31 was sent three times,
+  four seconds apart, with nothing else going on. The displayed slot changed on every one,
+  off the fifteen-second rotation beat, and the dwell timer restarted from the command.
+  A command that only started playback already running would have done nothing at all.
+
+  Why it stayed open for so long: both readings predict the same outcome when a single
+  slot is filled, because the scene after the only scene is that same scene -- and the
+  earlier test had one slot. The two readings are only distinguishable with several.
+
+- **Command 30 stops playback, and this integration had that right.** Each 30 cleared the
+  `scenes_enabled` bit in the state word, `0x2204` to `0x2200`, and the display went idle.
+  A step to the previous scene would not touch that bit. The stop does not hold: the clock
+  sets the bit again by itself within about a second. Nothing here causes that -- the only
+  automatic 31 follows a scene write, and no scene was written.
+
+- **While scenes play, the pushed `scene_data` low bits are the slot number.** 1.29.1
+  settled that pushed bytes are display status rather than a face number, which stands.
+  This refines what the low bits carry: filling only slots 1 and 5 pushed `01` and `05`,
+  where any flag reading would have given `01` and `02`. The Busy sensor is unaffected --
+  bit 7 is clear whenever a slot is up.
+
+### Changed
+- **`start_scenes` is now `next_scene`**, and the button reads **Next Scene**. The old
+  service name is kept as an alias sending the same frame, so existing automations and
+  Node-RED flows keep working. The button keeps its entity id under the old key on
+  purpose: renaming that would orphan the button already on somebody's dashboard.
+
+### Known
+- **A manual 31 delays the next scene write.** A scene normally appears the moment it is
+  written. If a 31 was sent by hand a few seconds earlier, the write waits for the next
+  natural tick instead, up to fifteen seconds. Matched pair on hardware: the same write,
+  to the same slot, with the same slot on screen, appeared at once without a preceding 31
+  and waited with one. It costs latency, never the update.
+
 ## [1.29.1] - 2026-08-12
 ### Fixed
 - **The Factory Scene select announced faces nobody had selected.** It read the `scene_data`

@@ -171,8 +171,9 @@ Once configured, the integration provides:
 - **Buttons** - Calibrate Hands, Confirm Hand Positions at 12, Animation Run, Animation Stop,
   and **Clear All Scenes**, which empties all eight slots. A scene replays until something
   clears it, so this is the way back when you no longer have the call that started it.
-  Also **Stop Timer** and **Stop Alarm**, and **Scene Playback Start/Stop** for a clock
-  left with playback stopped by a power cycle
+  Also **Stop Timer** and **Stop Alarm**, plus **Next Scene** and **Scene Playback Stop**.
+  With several slots filled the clock rotates between them every fifteen seconds; Next
+  Scene steps that rotation forward
 - **Animation controls** - Animation, Animation Colour, Animation Speed and **Animation
   Slot**, driving Animation Run. The Animation select carries the firmware animations *and*
   the three effects, so `pulse`, `wave` and `light_flash` need no YAML either. Animation

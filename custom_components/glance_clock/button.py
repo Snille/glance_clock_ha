@@ -189,11 +189,15 @@ class GlanceClockNamedCommandButton(GlanceClockCommandButton):
 
 
 #: The named commands worth a button, and how they should read on the page.
+#: The first element also builds the unique id, so the playback entry keeps the
+#: name `start_scenes` even though the button now reads "Next Scene" -- renaming
+#: the key would orphan the button already on somebody's dashboard. Both names
+#: send command 31; see services/commands.py for what it was measured doing.
 COMMAND_BUTTONS = (
     ("stop_timer", "Stop Timer", "mdi:timer-off-outline"),
     ("stop_alarm", "Stop Alarm", "mdi:alarm-off"),
     ("stop_scenes", "Scene Playback Stop", "mdi:pause-box-outline"),
-    ("start_scenes", "Scene Playback Start", "mdi:play-box-outline"),
+    ("start_scenes", "Next Scene", "mdi:skip-next-outline"),
 )
 
 

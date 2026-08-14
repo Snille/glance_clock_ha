@@ -88,11 +88,21 @@ def test_playback_start_is_the_frame_scene_writes_already_send():
     assert commands.build_command("start_scenes") == bytes([31, 0, 0, 0])
 
 
+def test_next_scene_and_start_scenes_are_the_same_frame():
+    """31 was measured stepping to the next scene, not starting playback.
+
+    `start_scenes` is kept as an alias so existing automations and Node-RED
+    flows keep working, so the two must not drift apart.
+    """
+    assert commands.build_command("next_scene") == bytes([31, 0, 0, 0])
+    assert commands.build_command("start_scenes") == commands.build_command("next_scene")
+
+
 def test_an_unknown_name_is_refused_with_the_alternatives():
     with pytest.raises(ValueError) as err:
-        commands.build_command("next_scene")
+        commands.build_command("rewind_scene")
     message = str(err.value)
-    assert "next_scene" in message
+    assert "rewind_scene" in message
     for name in commands.NAMED_COMMANDS:
         assert name in message
 

@@ -700,15 +700,25 @@ stop_scenes:
   name: Stop scene playback
   description: >-
     Stop the scene engine. Scenes stay in their slots but nothing is drawn from
-    them until playback is started again. Useful mainly for getting out of a
-    state where the clock was left stopped -- for instance after a power cycle.
+    them until playback resumes. Note that the stop does not hold: the clock
+    restarts playback by itself after about a second, which was measured on
+    hardware rather than intended.
+
+next_scene:
+  name: Next scene
+  description: >-
+    Show the next filled slot, and restart its fifteen-second turn. With several
+    slots filled the clock rotates between them on its own; this steps that
+    rotation forward. With one slot filled the next scene is the same scene,
+    which is why a scene write sends this to make the new scene appear at once.
+    Sending it by hand delays the next scene write until the following tick.
 
 start_scenes:
-  name: Start scene playback
+  name: Start scene playback (alias for Next scene)
   description: >-
-    Start the scene engine, and redraw at once. This is what every scene write
-    already sends for you, which is why a scene appears the moment it is sent.
-    Sending it by hand is for recovering a clock that was left stopped.
+    Sends command 31, exactly as Next scene does. Kept under its old name so
+    automations and Node-RED flows written against earlier versions keep
+    working. Prefer Next scene, which says what the command actually does.
 
 send_rain_forecast:
   name: Send rain forecast

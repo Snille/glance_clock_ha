@@ -5,18 +5,27 @@ ones should not require knowing a number, and because a timer the clock is
 running had no way to be cancelled at all -- `send_timer` could start one and
 nothing could stop it.
 
-A note on 30 and 31, because there is a disagreement on record. This integration
-calls them stop and start scene playback, on the strength of what 31 does here:
-sending it after writing a scene makes that scene appear at once, which is why
-every scene write is followed by one. mrmstn/glance_clock_ha names the same two
-numbers `previous_scene` and `next_scene` -- carousel navigation -- and keeps
-stop/start as aliases for them.
+A note on 30 and 31, settled against hardware 2026-08-14 after a disagreement
+with mrmstn/glance_clock_ha, which called them `previous_scene`/`next_scene`.
 
-Both readings cannot be right, and only one of them is tested here. If 31 meant
-"advance the carousel", writing a scene to slot 2 and then sending it would
-show whatever came next rather than slot 2, and what we filmed is slot 2. So
-they are named for what they were watched doing. Whether the firmware also has
-carousel navigation, on these numbers or others, is open -- see SCENES.md.
+**31 advances to the next scene.** Sent three times, four seconds apart, with
+three slots filled and nothing else going on, it changed the displayed slot
+each time -- off the fifteen-second rotation beat, restarting the dwell timer
+from the command. Something that only started playback already running would
+have done nothing. So the service is `next_scene` now, with `start_scenes`
+kept as an alias.
+
+**30 stops playback.** Each 30 cleared the `scenes_enabled` bit in the state
+word, 0x2204 -> 0x2200, and the display went idle. A step to the previous scene
+would not touch that bit. The stop does not hold: the clock sets the bit again
+by itself within about a second.
+
+Why this stayed open so long: both readings predict the same outcome when only
+one slot is filled, because "next scene" with one scene is that same scene --
+and the earlier test had one slot. Three slots separate them. That is also why
+sending 31 after a scene write still works as a refresh, and why it is left in
+place; see `_refresh_scene_playback` in notify.py, and SCENES.md for the quirk
+where a manual 31 makes the *next* write wait for the natural tick.
 """
 
 import logging
@@ -35,6 +44,9 @@ NAMED_COMMANDS = {
     "stop_timer": 10,
     "stop_alarm": 20,
     "stop_scenes": 30,
+    "next_scene": 31,
+    #: Alias, kept because automations and Node-RED flows written against
+    #: earlier versions call it. Sends 31, exactly as next_scene does.
     "start_scenes": 31,
 }
 

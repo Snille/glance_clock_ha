@@ -604,7 +604,7 @@ suspecting the slots.
 
 `binary_sensor.<name>_do_not_disturb` answers it without guesswork.
 
-## Settled, and still open
+## Settled
 
 Both questions came from comparing notes with
 [mrmstn/glance_clock_ha](https://github.com/mrmstn/glance_clock_ha), a parallel
@@ -613,15 +613,41 @@ implementation that reaches parts of the firmware this one had not.
 **Settled: `scene_data` reads and writes are not the same thing.** The question
 was whether the low bits of that byte are a face number or a display status. The
 answer is both, depending on direction. Written, the low bits select one of the
-clock's own faces. Pushed, they are status — bit 0 is the digital time, and bit
-7 is idle. The evidence was accidental: a version that decoded pushed bytes as
-faces reported "calendar" every time an unrelated setting was toggled, because
-toggling anything makes the clock push `0x81`. A face number would not change
-when you alter the date format.
+clock's own faces. Pushed, they are status — bit 7 is idle, and the low bits say
+what is on screen. The evidence was accidental: a version that decoded pushed
+bytes as faces reported "calendar" every time an unrelated setting was toggled,
+because toggling anything makes the clock push `0x81`. A face number would not
+change when you alter the date format.
 
-**Still open: what commands 30 and 31 do.** Here they are stop and start scene playback,
-because 31 is what every scene write already sends and the scene that comes up
-is the one just written — if it advanced a carousel, something else would
-appear. The other implementation calls them `previous_scene` and `next_scene`.
-Whether the firmware also has carousel navigation, on these numbers or on
-others, is unknown.
+**Refined 2026-08-14: while scenes are playing, the pushed low bits are the slot
+number.** Not a flag field. Filling only slots 1 and 5 and watching the clock
+rotate pushed `01` and `05`, alternating every fifteen seconds — under any flag
+reading those would have been `01` and `02`. So the byte names the slot on
+screen, and `binary_sensor.<name>_busy` stays correct either way: bit 7 is clear
+whenever a slot is up.
+
+**Settled 2026-08-14: 30 stops playback, and 31 steps to the next scene.**
+Neither implementation had it entirely right, and the reason it stayed open so
+long is that both readings predict the same thing when only one slot is filled —
+"next scene" with one scene is the same scene. Three slots make them separate.
+
+Command 31 was sent three times, four seconds apart, with nothing else going on.
+The displayed slot changed on each one, off the fifteen-second beat, and the
+dwell timer restarted from the command. A command that merely started playback
+already running would have done nothing at all. So 31 advances, and
+`next_scene` describes it better than `start_scenes` does.
+
+Command 30 is the one this integration had right. Each 30 cleared the
+`scenes_enabled` bit in the state word, `0x2204` to `0x2200`, and the display
+went idle. A step to the previous scene would not touch that bit. **The stop
+does not hold, though:** within about a second the clock sets the bit again by
+itself and a scene comes back. Nothing in this integration sends anything to
+cause that — the only automatic 31 follows a scene write, and no scene was
+written.
+
+**Quirk worth knowing: a manual 31 delays the next scene write.** Normally a
+scene appears the moment it is written. But if a 31 was sent by hand a few
+seconds earlier, the write does not come up until the next natural tick, up to
+fifteen seconds later. Matched pair on hardware: the same write, to the same
+slot, with the same slot on screen, appeared immediately without a preceding 31
+and waited for the tick with one. It costs latency, never the update.
